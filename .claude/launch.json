@@ -1,0 +1,25 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "ocp-viewer",
+      "runtimeExecutable": "python",
+      "runtimeArgs": [
+        "-m",
+        "ocp_viewer",
+        "--port",
+        "3939"
+      ],
+      "port": 3939
+    },
+    {
+      "name": "sim",
+      "runtimeExecutable": "python",
+      "runtimeArgs": [
+        "sim.py",
+        "--serve"
+      ],
+      "port": 8123
+    }
+  ]
+}
