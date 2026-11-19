@@ -99,4 +99,4 @@ Every command, model detail and number is in [REFERENCE.md](REFERENCE.md).
 
 ## License
 
-MIT: see [LICENSE](LICENSE). The GitHub icon on the site is from [Hugeicons](https://hugeicons.com) (MIT), and the hawk in the favicon is Andy Wilson's silhouette from [PhyloPic](https://www.phylopic.org) (public domain).
+MIT: see [LICENSE](LICENSE). The GitHub icon on the site is from [Hugeicons](https://hugeicons.com) (MIT).
