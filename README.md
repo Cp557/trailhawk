@@ -1,8 +1,12 @@
-# Tri-tiltrotor VTOL drone
+# Trailhawk
 
-A drone I designed to build myself. It takes off straight up from a trail, flies on its wing, and circles 100 m above a hiker on high mountain trails, scanning the trail ahead for wildlife with a thermal and a color camera. It comes apart to fit in a backpack.
+![Trailhawk, rendered in Blender from the CAD model](docs/trailhawk.jpg)
+
+A tri-tiltrotor VTOL drone I designed to build myself. It takes off straight up from a trail, flies on its wing, and circles 100 m above a hiker on high mountain trails, scanning the trail ahead for wildlife with a thermal and a color camera. It comes apart to fit in a backpack.
 
 It is designed, analyzed and flight-simulated, and ready to build. Every bought part is a real product, priced in November 2026, and the airframe splits into pieces a home 3D printer can print. It isn't built yet.
+
+**See it live:** [the 3D model](https://trailhawk.vercel.app) and [the flight simulator](https://trailhawk.vercel.app/sim/).
 
 ## The problem
 

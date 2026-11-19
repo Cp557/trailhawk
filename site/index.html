@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Tri-tiltrotor VTOL</title>
-<meta name="description" content="A tri-tiltrotor VTOL drone that circles over a hiker on high trails: the 3D model, built from real parts in Python.">
+<title>Trailhawk · tri-tiltrotor VTOL drone</title>
+<meta name="description" content="Trailhawk, a tri-tiltrotor VTOL drone that circles over a hiker on high trails: the 3D model, built from real parts in Python.">
 <style>
   :root { --ink: #1b1f24; --muted: #5b6470; --panel: rgba(255, 255, 255, 0.8); --line: rgba(27, 31, 36, 0.12); }
   html, body { margin: 0; height: 100%; overflow: hidden; color: var(--ink); font: 15px/1.45 system-ui, -apple-system, "Segoe UI", sans-serif;
@@ -21,6 +21,7 @@
   #specs dd { margin: 0; font-weight: 600; }
   .fly { display: inline-block; padding: 8px 14px; border-radius: 8px; background: var(--ink); color: #fff; font-weight: 600; text-decoration: none; }
   .fly:hover { background: #343b44; }
+  .more { display: block; margin-top: 10px; color: var(--muted); font-size: 14px; }
   #tools { left: 50%; bottom: 16px; transform: translateX(-50%); width: max-content; max-width: calc(100% - 32px); box-sizing: border-box;
     display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 6px; padding: 8px; }
   #tools button { font: inherit; font-size: 14px; padding: 6px 12px; border: 1px solid var(--line); border-radius: 8px; background: #fff; color: var(--ink); cursor: pointer; }
@@ -50,10 +51,11 @@
 </head>
 <body>
 <section id="intro" class="panel">
-  <h1>Tri-tiltrotor VTOL</h1>
-  <p>A drone that takes off straight up, flies on its wing and circles over a hiker on high trails, scanning for wildlife with thermal and color cameras. Sized for 12,000 ft, it comes apart to fit a backpack. Modeled in Python with build123d from real, buyable parts.</p>
+  <h1>Trailhawk</h1>
+  <p>A tri-tiltrotor VTOL drone that takes off straight up, flies on its wing and circles over a hiker on high trails, scanning for wildlife with thermal and color cameras. Sized for 12,000 ft, it comes apart to fit a backpack. Modeled in Python with build123d from real, buyable parts.</p>
   <dl id="specs"></dl>
   <a class="fly" href="sim/">Fly it in the simulator &rarr;</a>
+  <a class="more" href="https://github.com/Cp557/trailhawk">Requirements, design and parts list &rarr;</a>
 </section>
 <div id="tools" class="panel" hidden>
   <button id="edges" aria-pressed="true">Edges</button>
