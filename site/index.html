@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tri-tiltrotor VTOL</title>
+<meta name="description" content="A tri-tiltrotor VTOL drone that circles over a hiker on high trails: the 3D model, built from real parts in Python.">
+<style>
+  :root { --ink: #1b1f24; --muted: #5b6470; --panel: rgba(255, 255, 255, 0.8); --line: rgba(27, 31, 36, 0.12); }
+  html, body { margin: 0; height: 100%; overflow: hidden; color: var(--ink); font: 15px/1.45 system-ui, -apple-system, "Segoe UI", sans-serif;
+    background: radial-gradient(ellipse at 50% 42%, #fbfcfd 0%, #e8ecf0 58%, #d3d9e0 100%); }
+  [hidden] { display: none !important; }
+  canvas { display: block; touch-action: none; }
+  .panel { position: absolute; background: var(--panel); -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px);
+    border: 1px solid var(--line); border-radius: 12px; box-shadow: 0 6px 24px rgba(20, 30, 40, 0.08); }
+  #intro { top: 16px; left: 16px; width: 330px; padding: 16px 18px; box-sizing: border-box; }
+  h1 { margin: 0 0 6px; font-size: 22px; letter-spacing: -0.01em; }
+  #intro p { margin: 0 0 12px; color: var(--muted); }
+  #specs { display: grid; grid-template-columns: auto 1fr; gap: 2px 14px; margin: 0 0 14px; font-variant-numeric: tabular-nums; }
+  #specs dt { color: var(--muted); }
+  #specs dd { margin: 0; font-weight: 600; }
+  .fly { display: inline-block; padding: 8px 14px; border-radius: 8px; background: var(--ink); color: #fff; font-weight: 600; text-decoration: none; }
+  .fly:hover { background: #343b44; }
+  #tools { left: 50%; bottom: 16px; transform: translateX(-50%); width: max-content; max-width: calc(100% - 32px); box-sizing: border-box;
+    display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 6px; padding: 8px; }
+  #tools button { font: inherit; font-size: 14px; padding: 6px 12px; border: 1px solid var(--line); border-radius: 8px; background: #fff; color: var(--ink); cursor: pointer; }
+  #tools button:hover { border-color: rgba(27, 31, 36, 0.3); }
+  #tools button[aria-pressed="true"] { background: var(--ink); border-color: var(--ink); color: #fff; }
+  #part { top: 0; left: 0; padding: 4px 9px; border-radius: 7px; font-size: 13px; pointer-events: none; white-space: nowrap; }
+  #message { top: 50%; left: 50%; transform: translate(-50%, -50%); padding: 12px 18px; color: var(--muted); }
+  @media (max-width: 640px) {
+    #intro { top: 12px; left: 12px; right: 12px; width: auto; padding: 12px 14px; }
+    h1 { font-size: 19px; }
+    #intro p { display: none; }
+    #specs { grid-template-columns: repeat(3, auto); gap: 0 12px; margin-bottom: 10px; }
+    #specs dt { grid-row: 1; font-size: 12px; }
+    #specs dd { grid-row: 2; }
+    #tools { left: 12px; right: 12px; bottom: 12px; width: auto; max-width: none; transform: none; }
+  }
+  @media (max-height: 520px) {
+    #intro p { display: none; }
+  }
+</style>
+<script type="importmap">
+{ "imports": {
+  "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+  "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+} }
+</script>
+</head>
+<body>
+<section id="intro" class="panel">
+  <h1>Tri-tiltrotor VTOL</h1>
+  <p>A drone that takes off straight up, flies on its wing and circles over a hiker on high trails, scanning for wildlife with thermal and color cameras. Sized for 12,000 ft, it comes apart to fit a backpack. Modeled in Python with build123d from real, buyable parts.</p>
+  <dl id="specs"></dl>
+  <a class="fly" href="sim/">Fly it in the simulator &rarr;</a>
+</section>
+<div id="tools" class="panel" hidden>
+  <button id="edges" aria-pressed="true">Edges</button>
+  <button id="xray" aria-pressed="false">X-ray</button>
+  <button id="explode" aria-pressed="false">Explode</button>
+</div>
+<div id="part" class="panel" hidden></div>
+<div id="message" class="panel">Loading the model&hellip;</div>
+<script type="module" src="cad.js"></script>
+</body>
+</html>

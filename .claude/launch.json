@@ -3,7 +3,7 @@
   "configurations": [
     {
       "name": "ocp-viewer",
-      "runtimeExecutable": "python",
+      "runtimeExecutable": ".venv/bin/python",
       "runtimeArgs": [
         "-m",
         "ocp_viewer",
@@ -13,10 +13,11 @@
       "port": 3939
     },
     {
-      "name": "sim",
-      "runtimeExecutable": "python",
+      "name": "site",
+      "runtimeExecutable": ".venv/bin/python",
       "runtimeArgs": [
-        "sim.py",
+        "-m",
+        "drone.sim",
         "--serve"
       ],
       "port": 8123

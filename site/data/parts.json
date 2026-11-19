@@ -1,0 +1,596 @@
+[
+ {
+  "file": "000.stl",
+  "path": "/fuselage",
+  "color": [
+   0.1176471,
+   0.1176471,
+   0.1294118
+  ]
+ },
+ {
+  "file": "001.stl",
+  "path": "/details",
+  "color": [
+   0.227451,
+   0.227451,
+   0.2352941
+  ]
+ },
+ {
+  "file": "002.stl",
+  "path": "/wing",
+  "color": [
+   0.1176471,
+   0.1176471,
+   0.1294118
+  ]
+ },
+ {
+  "file": "003.stl",
+  "path": "/horizontal_tail",
+  "color": [
+   0.1176471,
+   0.1176471,
+   0.1294118
+  ]
+ },
+ {
+  "file": "004.stl",
+  "path": "/fin",
+  "color": [
+   0.1176471,
+   0.1176471,
+   0.1294118
+  ]
+ },
+ {
+  "file": "005.stl",
+  "path": "/aileron_right",
+  "color": [
+   0.9372549,
+   0.4235294,
+   0.1215686
+  ]
+ },
+ {
+  "file": "006.stl",
+  "path": "/aileron_left",
+  "color": [
+   0.9372549,
+   0.4235294,
+   0.1215686
+  ]
+ },
+ {
+  "file": "007.stl",
+  "path": "/elevator_right",
+  "color": [
+   0.9372549,
+   0.4235294,
+   0.1215686
+  ]
+ },
+ {
+  "file": "008.stl",
+  "path": "/elevator_left",
+  "color": [
+   0.9372549,
+   0.4235294,
+   0.1215686
+  ]
+ },
+ {
+  "file": "009.stl",
+  "path": "/rudder",
+  "color": [
+   0.9372549,
+   0.4235294,
+   0.1215686
+  ]
+ },
+ {
+  "file": "010.stl",
+  "path": "/nacelles",
+  "color": [
+   0.9372549,
+   0.4235294,
+   0.1215686
+  ]
+ },
+ {
+  "file": "011.stl",
+  "path": "/tail_nacelle",
+  "color": [
+   0.1176471,
+   0.1176471,
+   0.1294118
+  ]
+ },
+ {
+  "file": "012.stl",
+  "path": "/motor_right/mount",
+  "color": [
+   0.1843137,
+   0.3098039,
+   0.3098039
+  ]
+ },
+ {
+  "file": "013.stl",
+  "path": "/motor_right/motor",
+  "color": [
+   0.4117647,
+   0.4117647,
+   0.4117647
+  ]
+ },
+ {
+  "file": "014.stl",
+  "path": "/motor_right/prop_nut",
+  "color": [
+   0.7529412,
+   0.7529412,
+   0.7529412
+  ]
+ },
+ {
+  "file": "015.stl",
+  "path": "/motor_right/propeller",
+  "color": [
+   0.0,
+   0.0,
+   0.0
+  ]
+ },
+ {
+  "file": "016.stl",
+  "path": "/motor_left/mount",
+  "color": [
+   0.1843137,
+   0.3098039,
+   0.3098039
+  ]
+ },
+ {
+  "file": "017.stl",
+  "path": "/motor_left/motor",
+  "color": [
+   0.4117647,
+   0.4117647,
+   0.4117647
+  ]
+ },
+ {
+  "file": "018.stl",
+  "path": "/motor_left/prop_nut",
+  "color": [
+   0.7529412,
+   0.7529412,
+   0.7529412
+  ]
+ },
+ {
+  "file": "019.stl",
+  "path": "/motor_left/propeller",
+  "color": [
+   0.0,
+   0.0,
+   0.0
+  ]
+ },
+ {
+  "file": "020.stl",
+  "path": "/motor_tail/mount",
+  "color": [
+   0.1843137,
+   0.3098039,
+   0.3098039
+  ]
+ },
+ {
+  "file": "021.stl",
+  "path": "/motor_tail/motor",
+  "color": [
+   0.4117647,
+   0.4117647,
+   0.4117647
+  ]
+ },
+ {
+  "file": "022.stl",
+  "path": "/motor_tail/prop_nut",
+  "color": [
+   0.7529412,
+   0.7529412,
+   0.7529412
+  ]
+ },
+ {
+  "file": "023.stl",
+  "path": "/motor_tail/propeller",
+  "color": [
+   0.0,
+   0.0,
+   0.0
+  ]
+ },
+ {
+  "file": "024.stl",
+  "path": "/hinges/motor_right_hinge/tilt_servo",
+  "color": [
+   0.254902,
+   0.4117647,
+   0.8823529
+  ]
+ },
+ {
+  "file": "025.stl",
+  "path": "/hinges/motor_right_hinge/bearing",
+  "color": [
+   0.1843137,
+   0.3098039,
+   0.3098039
+  ]
+ },
+ {
+  "file": "026.stl",
+  "path": "/hinges/motor_right_hinge/hinge_pin",
+  "color": [
+   0.7529412,
+   0.7529412,
+   0.7529412
+  ]
+ },
+ {
+  "file": "027.stl",
+  "path": "/hinges/motor_left_hinge/tilt_servo",
+  "color": [
+   0.254902,
+   0.4117647,
+   0.8823529
+  ]
+ },
+ {
+  "file": "028.stl",
+  "path": "/hinges/motor_left_hinge/bearing",
+  "color": [
+   0.1843137,
+   0.3098039,
+   0.3098039
+  ]
+ },
+ {
+  "file": "029.stl",
+  "path": "/hinges/motor_left_hinge/hinge_pin",
+  "color": [
+   0.7529412,
+   0.7529412,
+   0.7529412
+  ]
+ },
+ {
+  "file": "030.stl",
+  "path": "/hinges/motor_tail_hinge/bearing",
+  "color": [
+   0.1843137,
+   0.3098039,
+   0.3098039
+  ]
+ },
+ {
+  "file": "031.stl",
+  "path": "/hinges/motor_tail_hinge/hinge_pin",
+  "color": [
+   0.7529412,
+   0.7529412,
+   0.7529412
+  ]
+ },
+ {
+  "file": "032.stl",
+  "path": "/spars/fin_spar",
+  "color": [
+   0.0,
+   0.0,
+   0.0
+  ]
+ },
+ {
+  "file": "033.stl",
+  "path": "/spars/boom_spar",
+  "color": [
+   0.0,
+   0.0,
+   0.0
+  ]
+ },
+ {
+  "file": "034.stl",
+  "path": "/spars/boom_socket",
+  "color": [
+   0.0,
+   0.0,
+   0.0
+  ]
+ },
+ {
+  "file": "035.stl",
+  "path": "/spars/wing_root_tube_right",
+  "color": [
+   0.0,
+   0.0,
+   0.0
+  ]
+ },
+ {
+  "file": "036.stl",
+  "path": "/spars/wing_spar_inner_right",
+  "color": [
+   0.0,
+   0.0,
+   0.0
+  ]
+ },
+ {
+  "file": "037.stl",
+  "path": "/spars/wing_spar_outer_right",
+  "color": [
+   0.0,
+   0.0,
+   0.0
+  ]
+ },
+ {
+  "file": "038.stl",
+  "path": "/spars/wing_joiner_inner_right",
+  "color": [
+   0.0,
+   0.0,
+   0.0
+  ]
+ },
+ {
+  "file": "039.stl",
+  "path": "/spars/wing_joiner_outer_right",
+  "color": [
+   0.0,
+   0.0,
+   0.0
+  ]
+ },
+ {
+  "file": "040.stl",
+  "path": "/spars/tail_spar_right",
+  "color": [
+   0.0,
+   0.0,
+   0.0
+  ]
+ },
+ {
+  "file": "041.stl",
+  "path": "/spars/wing_root_tube_left",
+  "color": [
+   0.0,
+   0.0,
+   0.0
+  ]
+ },
+ {
+  "file": "042.stl",
+  "path": "/spars/wing_spar_inner_left",
+  "color": [
+   0.0,
+   0.0,
+   0.0
+  ]
+ },
+ {
+  "file": "043.stl",
+  "path": "/spars/wing_spar_outer_left",
+  "color": [
+   0.0,
+   0.0,
+   0.0
+  ]
+ },
+ {
+  "file": "044.stl",
+  "path": "/spars/wing_joiner_inner_left",
+  "color": [
+   0.0,
+   0.0,
+   0.0
+  ]
+ },
+ {
+  "file": "045.stl",
+  "path": "/spars/wing_joiner_outer_left",
+  "color": [
+   0.0,
+   0.0,
+   0.0
+  ]
+ },
+ {
+  "file": "046.stl",
+  "path": "/spars/tail_spar_left",
+  "color": [
+   0.0,
+   0.0,
+   0.0
+  ]
+ },
+ {
+  "file": "047.stl",
+  "path": "/center_fitting",
+  "color": [
+   0.4117647,
+   0.4117647,
+   0.4117647
+  ]
+ },
+ {
+  "file": "048.stl",
+  "path": "/avionics/battery",
+  "color": [
+   1.0,
+   0.6470588,
+   0.0
+  ]
+ },
+ {
+  "file": "049.stl",
+  "path": "/avionics/computer",
+  "color": [
+   1.0,
+   0.6470588,
+   0.0
+  ]
+ },
+ {
+  "file": "050.stl",
+  "path": "/avionics/flight_controller",
+  "color": [
+   1.0,
+   0.6470588,
+   0.0
+  ]
+ },
+ {
+  "file": "051.stl",
+  "path": "/avionics/receiver",
+  "color": [
+   1.0,
+   0.6470588,
+   0.0
+  ]
+ },
+ {
+  "file": "052.stl",
+  "path": "/avionics/gps",
+  "color": [
+   1.0,
+   0.6470588,
+   0.0
+  ]
+ },
+ {
+  "file": "053.stl",
+  "path": "/avionics/esc_tail",
+  "color": [
+   1.0,
+   0.6470588,
+   0.0
+  ]
+ },
+ {
+  "file": "054.stl",
+  "path": "/avionics/rudder_servo",
+  "color": [
+   1.0,
+   0.6470588,
+   0.0
+  ]
+ },
+ {
+  "file": "055.stl",
+  "path": "/avionics/esc_right",
+  "color": [
+   1.0,
+   0.6470588,
+   0.0
+  ]
+ },
+ {
+  "file": "056.stl",
+  "path": "/avionics/aileron_servo_right",
+  "color": [
+   1.0,
+   0.6470588,
+   0.0
+  ]
+ },
+ {
+  "file": "057.stl",
+  "path": "/avionics/elevator_servo_right",
+  "color": [
+   1.0,
+   0.6470588,
+   0.0
+  ]
+ },
+ {
+  "file": "058.stl",
+  "path": "/avionics/esc_left",
+  "color": [
+   1.0,
+   0.6470588,
+   0.0
+  ]
+ },
+ {
+  "file": "059.stl",
+  "path": "/avionics/aileron_servo_left",
+  "color": [
+   1.0,
+   0.6470588,
+   0.0
+  ]
+ },
+ {
+  "file": "060.stl",
+  "path": "/avionics/elevator_servo_left",
+  "color": [
+   1.0,
+   0.6470588,
+   0.0
+  ]
+ },
+ {
+  "file": "061.stl",
+  "path": "/landing_gear",
+  "color": [
+   0.1098039,
+   0.1098039,
+   0.1176471
+  ]
+ },
+ {
+  "file": "062.stl",
+  "path": "/gimbal_mount",
+  "color": [
+   0.4117647,
+   0.4117647,
+   0.4117647
+  ]
+ },
+ {
+  "file": "063.stl",
+  "path": "/gimbal/camera",
+  "color": [
+   0.1843137,
+   0.3098039,
+   0.3098039
+  ]
+ },
+ {
+  "file": "064.stl",
+  "path": "/gimbal/thermal_lens",
+  "color": [
+   0.0,
+   0.0,
+   0.0
+  ]
+ },
+ {
+  "file": "065.stl",
+  "path": "/gimbal/lens",
+  "color": [
+   0.0,
+   0.0,
+   0.0
+  ]
+ }
+]

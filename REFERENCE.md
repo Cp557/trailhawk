@@ -1,46 +1,58 @@
 # Reference
 
-Parametric CAD models of two small fixed-wing drones (a conventional trainer and a tri-tiltrotor VTOL), written with [build123d](https://github.com/gumyr/build123d) (0.13) and viewed with [ocp_vscode](https://github.com/bernhard-42/vscode-ocp-cad-viewer). The VTOL is specified with real, buyable parts (`parts.py`) in ArduPilot's tilt-tricopter layout. Its mission is circling over a hiker on high trails while scanning for wildlife, so it is sized for 12,000 ft, comes apart to fit a backpack and carries thermal and color cameras with an onboard computer. It has weight-and-balance, power-and-endurance and strength models driven by those parts' data, a printable, bed-sized split of its airframe, photoreal renders, and a browser flight simulator flown from the keyboard.
+Parametric CAD model of a small tri-tiltrotor VTOL drone, written with [build123d](https://github.com/gumyr/build123d) (0.13) and viewed with [ocp_vscode](https://github.com/bernhard-42/vscode-ocp-cad-viewer). It is specified with real, buyable parts (`drone/parts.py`) in ArduPilot's tilt-tricopter layout. Its mission is circling over a hiker on high trails while scanning for wildlife, so it is sized for 12,000 ft, comes apart to fit a backpack and carries thermal and color cameras with an onboard computer. It has weight-and-balance, power-and-endurance and strength models driven by those parts' data, a printable, bed-sized split of its airframe, photoreal renders, and a static website: a page to turn the model over in 3D, and a browser flight simulator flown from the keyboard over a generated mountain world, where it follows a hiker walking a trail to a lake and maps the wildlife its cameras find.
 
-## Files
+## Layout
 
-| File | Purpose |
+| Path | Purpose |
 | --- | --- |
-| `parts.py` | The real parts: name, link, mass, size and the specs the models use (motor test table, prop coefficients, servo torque, battery capacity). Single source for `vtol.py`, `balance.py` and `performance.py`. |
-| `drone.py` | Conventional trainer (`build_drone()`) plus the shared helpers (`section`, `surface`, `span_plane`, `fin_plane`, `propeller`, `labeled`, `export_and_show`). Run it to export and display. |
-| `vtol.py` | Tri-tiltrotor VTOL (`build_vtol()`), built from the `drone.py` helpers with part sizes from `parts.py`: airframe, moving parts located at their pivots, motor hinges, carbon spars and joiners, internal components, payload turret, paint and surface details. Run it to export and display. |
-| `fly.py` | Viewer animation of the VTOL: takeoff, transition, banked lap, landing. |
-| `balance.py` | Weight and balance: mass of every part, CG in cruise and hover, MAC, wing loading, stall speed, hover thrust split. Run it for a report. |
-| `performance.py` | Power and flight time from the parts' data, in any `Air`: a propulsion check against the motor maker's test, hover and full-throttle thrust and current, tilt-servo load, cruise drag buildup and power curve, and takeoff-cruise-landing and circling missions. Run it for a report at 12,000 ft and sea level. |
-| `strength.py` | Strength of the carbon structure: spars, joiners, center fitting, tail, boom and skids under gust, thrust and landing loads. Run it for a report. |
-| `pack.py` | Packing list: the sections the airframe separates into on the trail, and whether each fits a backpack. Run it for a report. |
-| `render.py`, `render_scene.py` | Exports every part with its paint color, then runs Blender headless to render `out/render/studio.png` and `aerial.png`. |
-| `sim.py`, `sim/` | Browser flight simulator. `sim.py` exports the flight data and a light mesh to `out/sim/` and serves the project; `sim/physics.js` is the flight model, `sim/control.js` the flight controller, `sim/app.js` and `sim/index.html` the three.js view, keyboard and instruments, and `sim/check.mjs` flies it headless for the tests. |
-| `print_parts.py` | Printable airframe: hollowed, trimmed, channeled and pocketed printed parts cut into pieces that fit a 256 mm bed. Run it to write `out/print/*.stl` and display the pieces. |
-| `test_drone.py`, `test_vtol.py`, `test_balance.py`, `test_performance.py`, `test_print.py`, `test_pack.py`, `test_strength.py`, `test_sim.py` | `unittest` checks: solid validity, key dimensions, pivots, prop and tilt clearance, component and spar fit, the flight timeline, balance limits and tail volumes, the propulsion model against the motor test, thrust, current and servo margins at altitude, the energy budget, that print pieces fit the bed, conserve material and clear the hardware, that every field section fits the pack, that every strength check has a positive margin, and that the simulator matches the reports and flies a whole trip (needs Node.js, skipped without it). |
+| `README.md` | The public overview: the problem, the requirements with their results, the design choices, what to test first, and the parts list with prices (checked 2026-11-19) and links. |
+| `drone/` | The Python package: the model, its analyses and exports. Run a module with `python -m drone.<module>` from the repo root. |
+| `drone/parts.py` | The real parts: name, link, mass, size and the specs the models use (motor test table, prop coefficients, servo torque, battery capacity). Single source for `vtol.py`, `balance.py` and `performance.py`. |
+| `drone/cad.py` | Shared build123d helpers: NACA `section`s lofted into `surface`s on `span_plane`/`fin_plane` stations, the `propeller`, `labeled`, `world_parts` (every leaf of an assembly in place, with its path), and the exports: `export_and_show` (STEP and STL to `out/`, then the viewer), `export_parts` (one STL per part and a `parts.json` manifest) and `show_in_viewer`. |
+| `drone/vtol.py` | Tri-tiltrotor VTOL (`build_vtol()`), built from the `cad.py` helpers with part sizes from `parts.py`: airframe, moving parts located at their pivots, motor hinges, carbon spars and joiners, internal components, payload turret, paint and surface details. Run it to export and display. |
+| `drone/fly.py` | Viewer animation of the VTOL: takeoff, transition, banked lap, landing. |
+| `drone/balance.py` | Weight and balance: mass of every part, CG in cruise and hover, MAC, wing loading, stall speed, hover thrust split. Run it for a report. |
+| `drone/performance.py` | Power and flight time from the parts' data, in any `Air`: a propulsion check against the motor maker's test, hover and full-throttle thrust and current, tilt-servo load, cruise drag buildup and power curve, and takeoff-cruise-landing and circling missions. Run it for a report at 12,000 ft and sea level. |
+| `drone/strength.py` | Strength of the carbon structure: spars, joiners, center fitting, tail, boom and skids under gust, thrust and landing loads. Run it for a report. |
+| `drone/pack.py` | Packing list: the sections the airframe separates into on the trail, and whether each fits a backpack. Run it for a report. |
+| `drone/print_parts.py` | Printable airframe: hollowed, trimmed, channeled and pocketed printed parts cut into pieces that fit a 256 mm bed. Run it to write `out/print/*.stl` and display the pieces. |
+| `drone/render.py`, `drone/render_scene.py` | Exports every part with its paint color, then runs Blender headless to render `out/render/studio.png` and `aerial.png`. |
+| `drone/sim.py` | The website's data and local server: the simulator's flight data (`aircraft(vtol)`), `--export` to rewrite `site/data/`, and a server for `site/`. |
+| `site/` | The website, all static files. `index.html` and `cad.js`: the model page. `aircraft.js`: the parts loader both pages share. `data/`: what `python -m drone.sim --export` writes, committed. `sim/`: the flight simulator, where `physics.js` is the flight model, `control.js` the flight controller, `world.js` the generated world (ground, trail, lake, trees, wildlife, the walking hiker and his phone), `sensors.js` what the aircraft's cameras detect, and `app.js` and `index.html` the page: the chase view, the drone camera's view, the readings and the map. |
+| `tests/` | `unittest` checks: solid validity, key dimensions, pivots, prop and tilt clearance, component and spar fit, the flight timeline, balance limits and tail volumes, the propulsion model against the motor test, thrust, current and servo margins at altitude, the energy budget, that print pieces fit the bed, conserve material and clear the hardware, that every field section fits the pack, that every strength check has a positive margin, that the simulator matches the reports, flies a whole trip, handles slopes, valleys and ridges, generates repeatable worlds with a walkable trail, follows the walking hiker to the lake under the 400 ft ceiling, that its cameras detect what the model says and map the hike, and that the committed site data matches the model. `check.mjs` flies the simulator headless for `test_sim.py` (needs Node.js; skipped without it). |
 | `requirements.txt` | Python dependencies. |
-| `.claude/launch.json` | Launch configs for the Claude desktop app's browser pane: `ocp-viewer` (the standalone viewer) and `sim` (`python sim.py --serve` on port 8123). |
-| `out/` | Generated `<name>.step` (colored, labeled assembly) and `<name>.stl` for `drone` and `vtol`, plus `print/<piece>.stl`, `render/` and `sim/`. Not source. |
+| `.claude/launch.json` | Launch configs for the Claude desktop app's browser pane: `ocp-viewer` (the standalone viewer) and `site` (`python -m drone.sim --serve` on port 8123), both run with `.venv/bin/python` (macOS/Linux path). |
+| `out/` | Generated, not source: `vtol.step` (colored, labeled assembly) and `vtol.stl`, `print/<piece>.stl` and `render/`. |
 
 ## Usage
 
+Setup needs Python 3 (tested on 3.14), Node.js (for `test_sim.py`) and Blender 5.2 (for renders). On macOS:
+
 ```bash
+brew install python node && brew install --cask blender
+python3 -m venv .venv && source .venv/bin/activate   # Windows: .venv\Scripts\activate
 pip install -r requirements.txt
-python -m ocp_viewer        # standalone viewer (no VS Code): open http://localhost:3939/viewer
-python drone.py             # writes out/drone.step, out/drone.stl, then sends the model to the viewer
-python vtol.py              # same for out/vtol.step, out/vtol.stl
-python fly.py               # shows the VTOL over a ground pad and starts the flight animation
-python balance.py           # prints the weight and balance report
-python performance.py       # prints the power and flight-time report
-python print_parts.py       # writes out/print/<piece>.stl (48 pieces) and shows them
-python pack.py              # prints the packing list
-python strength.py          # prints the strength report
-python render.py            # renders out/render/studio.png and aerial.png with Blender (set BLENDER if it is not in the default folder)
-python sim.py               # flight simulator: exports out/sim/, serves and opens http://localhost:8123/sim/ (--serve skips the export)
-python -m unittest -v       # runs all test_*.py (about 6 minutes)
 ```
 
-`export_and_show(shape, name)` writes both files and calls `ocp_vscode.show` on port 3939, which is served by either the standalone viewer (`python -m ocp_viewer`) or the VS Code OCP CAD Viewer extension. If neither is running, `show()` prints a `CommsWarning` that it cannot reach the viewer; the exports still complete and the script exits 0. The viewer does not keep models across page reloads; re-run the script after reloading. If the animation loads paused, press ▶ in the viewer's animation bar (bottom right). The toolbar's transparency toggle shows the internal components.
+With the venv active, `python` is the venv's interpreter on both systems. From the repo root:
+
+```bash
+python -m ocp_viewer          # standalone viewer (no VS Code): open http://localhost:3939/viewer
+python -m drone.vtol          # writes out/vtol.step and out/vtol.stl, then sends the model to the viewer
+python -m drone.fly           # shows the VTOL over a ground pad and starts the flight animation
+python -m drone.balance       # prints the weight and balance report
+python -m drone.performance   # prints the power and flight-time report
+python -m drone.print_parts   # writes out/print/<piece>.stl (48 pieces) and shows them
+python -m drone.pack          # prints the packing list
+python -m drone.strength      # prints the strength report
+python -m drone.render        # renders out/render/studio.png and aerial.png with Blender (set BLENDER if it is not in the default folder)
+python -m drone.sim           # serves the website and opens http://localhost:8123/: the model page, and the simulator at /sim/ (?seed=N picks the world)
+python -m drone.sim --export  # first rewrites site/data/ from the model: do this after changing it
+python -m unittest            # runs every test in tests/ (about 4 minutes)
+```
+
+`export_and_show(shape, name)` writes both files and sends the shape to the viewer (`show_in_viewer`: `ocp_vscode.show` on port 3939), which is served by either the standalone viewer (`python -m ocp_viewer`) or the VS Code OCP CAD Viewer extension. If neither is running, `show()` prints a `CommsWarning` that it cannot reach the viewer; the exports still complete and the script exits 0. The viewer does not keep models across page reloads; re-run the script after reloading. If the animation loads paused, press ▶ in the viewer's animation bar (bottom right). The toolbar's transparency toggle shows the internal components.
 
 ## Conventions
 
@@ -50,55 +62,37 @@ python -m unittest -v       # runs all test_*.py (about 6 minutes)
 - `span_plane(x, y, z)` is used for horizontal surfaces (lofted along Y, local Y = +Z); `fin_plane(x, z)` for the fin (lofted along Z, local Y = +Y).
 - Lifting surfaces are lofted between stations; the right half is built and mirrored about `Plane.XZ`, then fused.
 - `span_plane(...).rotated((cant, 0, 0))` rolls a section about X by `cant` degrees (used for the VTOL winglets).
-- `propeller(radius, pitch)` is built with its hub at the origin, spinning about X; callers place it with `Pos(...)`. Defaults are the trainer's 10×5 in.
+- `propeller(radius, pitch)` is built with its hub at the origin, spinning about X; callers place it with `Pos(...)`.
 - Bought parts take their size, mass and specs from `parts.py` (checked 2026-11-05, links in each entry). Anything not from a datasheet is marked as an estimate where it is defined.
-- Assembly children's `location` is relative to their parent `Compound`. The viewer turns every node into a group with that location, and animation rotations pivot about the group origin. Code that needs world coordinates composes the parent locations (see `balance.leaves`).
+- Assembly children's `location` is relative to their parent `Compound`. The viewer turns every node into a group with that location, and animation rotations pivot about the group origin. Code that needs world coordinates composes the parent locations (`cad.world_parts`, or `balance.leaves` with the front motors tilted).
 - `pivot_at(solid, loc)` keeps a solid in place but makes its location exactly `loc`, baking the inverse transform into the geometry. build123d 0.13 has no `relocate`, and its `transform_shape` only rewrites the location, so the helper calls `BRepBuilderAPI_Transform(..., copy=True)` directly.
 - `hinged(solid, hinge0, hinge1, gap=2)` cuts a control surface off the +X side of a lifting surface along the hinge line, leaving a 2 mm slot, and returns it pivoted on the hinge (origin `hinge0`, local X along the hinge).
 - `wing_stations()`, `tail_stations()` and `fin_stations()` return the (plane, chord, pitch) stations that the surfaces, spars, servo positions and MAC are all derived from. `chord_point(station, fraction)` and `surface_point(a, b, s, fraction, camber)` locate points on them.
 - **Volumes:** build123d's default `.volume` undercounts the lofted airfoil solids by up to ~25% (the wing reads 4.82e6 mm³; the adaptive integral and a mesh both give ≈ 6.5e6). Areas and centroids are accurate to < 1%. Where volume matters, use `BRepGProp.VolumeProperties_s(shape.wrapped, props, 1e-4)` as `test_print.volume` does. Zero-overlap checks are unaffected.
 - **Booleans:** a cutting tool that is a `Compound` of overlapping solids makes OCCT booleans silently wrong; fuse tools first (`print_parts.union`). A long thin boolean (a whole-length 1.2 mm fuselage liner) came out invalid, so joiner sleeves are cut from a 16 mm band at each joint instead.
 
-## Trainer (`drone.py`)
-
-`build_drone()` returns a `Compound` labeled `drone` whose children are one valid solid each:
-
-| Label | Geometry |
-| --- | --- |
-| `fuselage` | Smooth loft of 6 ellipses from `x = 0` to `x = 920`; max 112 × 128 mm; tail boom rises to centerline `z = 32`. |
-| `wing` | NACA 2412, half-span 700 (span 1400), chord 240 → 150, quarter chord unswept at `x = 300`, root at `z = 35`, 3° dihedral, 2° root incidence, 2° washout (tip 0°). Area 0.273 m², AR 7.2, MAC 198 mm. |
-| `horizontal_stabilizer` | NACA 0010, span 500, chord 140 → 100, quarter chord `x = 810 → 820`, `z = 30`, 0° incidence. |
-| `vertical_stabilizer` | NACA 0010, `z = 30 → 210`, chord 160 → 80, quarter chord `x = 800 → 850`. |
-| `motor` | Ø28 × 28 cylinder, `x = −28 → 0`. |
-| `spinner` | Cone Ø32 base at `x = −30`, 36 long. |
-| `propeller` | 2-blade 10×5 in (radius 127, pitch 127), NACA 4410 blades at `x = −38`; blade angle `atan(P / 2πr)`; Ø16 × 10 hub. |
-
-Overall envelope: 986 × 1400 × 337 mm (X × Y × Z).
-
-The wing and tail roots overlap the fuselage; parts are separate solids in the assembly, not fused to each other.
-
 ## VTOL (`vtol.py`)
 
-Tri-tiltrotor in ArduPilot's tilt-tricopter layout, built in cruise configuration: the front motors (`TILTING`) face forward, the rear motor is fixed upright. `build_vtol()` returns a `Compound` labeled `vtol` (76 solids, envelope 1276 × 2325 × 546 mm). Paint: carbon-black airframe and tail nacelle (`CARBON`), orange front pods and control surfaces (`ORANGE`), black skids (`BLACK`). Dark reads as a silhouette against the sky from the ground; orange stands out against forest.
+Tri-tiltrotor in ArduPilot's tilt-tricopter layout, built in cruise configuration: the front motors (`TILTING`) face forward, the rear motor is fixed upright. `build_vtol()` returns a `Compound` labeled `vtol` (76 solids, envelope 1276 × 2325 × 546 mm). Paint (`PAINT`, by role): carbon-black airframe and tail nacelle (#1e1e21), orange front pods and control surfaces (#ef6c1f), black skids and dark gray surface details. Dark reads as a silhouette against the sky from the ground; orange stands out against forest. Motors, props, lenses and fittings keep their own colors.
 
 | Label | Geometry | Moves (in `fly.py`) |
 | --- | --- | --- |
 | `fuselage` | Half-ellipsoid nose (`x = 0 → 100`) fused to a loft of the 7 `FUSELAGE` ellipses out to `x = 1200`: deep pod (max 160 × 176 mm) tapering into a ~30 mm tail boom that rises to `z = 48`. Separates at `BOOM_JOINT_X` = 640. `fuselage(inset)` gives the cavity inside an `inset`-thick skin. The union is passed through `.fix()` to be BRep-valid. | — |
 | `details` | Panel lines and vents standing 0.3 mm proud of the skin (`surface_details()`): seams at the hatch and boom joint, three cooling slots each side of the computer. | — |
 | `wing` | NACA 2412, span 2200 mm to the winglet roots (2325 with winglets). Straight inner panel to `y = 340` (`WING_CRANK_Y`), chord 260 → 230, quarter chord at `x = 390` (`WING_X`); outer panel swept 12° to `y = 1100` (`WING_TIP_Y`), chord 230 → 110; then a 4-section winglet rolling up to ~88° and rising ~140 mm. 2° dihedral, root at `z = 60`, incidence 2° → −1°. Inboard of `y = 130` (`WING_BLEND_Y`) the root flares into the fuselage (`wing_blend`: chord to 315 mm, section to 16% thick). Separates at `WING_JOINTS` = ±140 and ±480. | — |
-| `aileron_right`, `aileron_left` | Outer panel aft of 70% chord, from 35% to 92% of the outer panel span. | `rx` (hinge); same angle on both = roll |
+| `aileron_right`, `aileron_left` | Outer panel aft of 70% chord, from 35% to 92% of the outer panel span (`AILERON`). | `rx` (hinge); same angle on both = roll |
 | `horizontal_tail` | NACA 0010, span 520, chord 160 → 100, quarter chord swept 25° from `x = 1080`, `z = 46`. Bolts on as one piece. | — |
-| `elevator_right`, `elevator_left` | Aft of 65% chord, 6% → 98% span. | `rx`; left takes the negated angle |
+| `elevator_right`, `elevator_left` | Aft of 65% chord, 6% → 98% span (`ELEVATOR`). | `rx`; left takes the negated angle |
 | `fin` | NACA 0010, `z = 40 → 300` (`FIN_TIP_Z`), chord 200 → 110, quarter chord `x = 1050 → 1120`, with a dorsal fillet ahead of the hinge line blending its root into the boom. | — |
-| `rudder` | Aft of 65% chord, 11% → 86% of fin height (clear of boom and tip pod). | `rx` |
+| `rudder` | Aft of 65% chord, 11% → 86% of fin height, clear of boom and tip pod (`RUDDER`). The three layouts (span fractions, hinge chord fraction) also place the simulator's control surfaces. | `rx` |
 | `nacelles` | The 2 front pods: fixed circular-section pods running aft from each tilting motor's nose point (`MOTORS`), under the wing at `y = ±245` (`POD_Y`, far enough out to keep `PROP_GAP` at the prop tips), `x = 200 → 580`, axis `z = 48`. `nacelle(nose, length, inset)` gives the cavity. | — |
-| `tail_nacelle` | The same pod on the fin tip under the rear motor, `x = 1050 → 1230`, `z = 300`; holds `esc_tail`. A separate leaf so it can be painted black. | — |
+| `tail_nacelle` | The same pod on the fin tip under the rear motor, `x = 1050 → 1230`, `z = 300`; holds `esc_tail`. A separate leaf so it takes the airframe's paint. | — |
 | `motor_right`, `motor_left`, `motor_tail` | Assemblies located at their hinge `hinge(nose)` = nose + `HINGE_UP` (31) in Z, directly above the nacelle front face; the rear one is fixed at 90° (upright) and unbolts for packing. Children: `mount` (back plate, tab and knuckle bored for the pin); `motor`, the AT2820 (Ø35.2 can, `CAN_LENGTH` 43.5, plus a Ø5 shaft `SHAFT_OUT` 20 — the datasheet gives only the 63.5 mm total, so the split is an estimate), `MOTOR_GAP` (12) ahead of the hinge on the nacelle axis; `prop_nut`; `propeller`, 12×6 in, hub at local `(HUB_X, 0, −HINGE_UP)`. A front motor stays ahead of its nacelle face through the whole swing. | Front: `ry` tilt 0 = cruise, 90 = hover, up to 90 + `YAW_TILT` (10) for yaw; `propeller` spins `rx` |
 | `hinges` | Fixed half of each hinge (`<motor>_hinge`, located at the hinge), set into the top of the nacelle front. Front: `tilt_servo` (KST X12-708, 12 × 27.5 × 23, direct drive: its output spline is the hinge axis and drives the knuckle; spline position assumed 6 mm from the top), `bearing` lug on the other side, Ø3 `hinge_pin`. Rear: a lug each side and the pin bolting the mount upright. | — |
 | `spars` | Carbon tubes, 1 mm wall (`spar_lines()`). Each wing spar is one straight line (`spar_point(y)`, in plan swept 8°, along the airfoil's mean line) so straight joiners fit it: `wing_root_tube_*` (`y = 5 → 140`, Ø16), `wing_spar_inner_*` (`140 → 480`, Ø16), `wing_spar_outer_*` (`480 → 850`, Ø16, stops at `SPAR_END_Y`). Loose joiners: `wing_joiner_inner_*` Ø14 × 240 at `y = 140`, `wing_joiner_outer_*` Ø14 × 200 at `y = 480` (`JOINER_EMBED`). `boom_spar` Ø16 from `x = 550` (`BOOM_SOCKET_START`) to 1030, in a `boom_socket` Ø18 in the pod. `tail_spar_*` Ø6 and `fin_spar` Ø8 unchanged. | — |
-| `center_fitting` | Printed block inside the fuselage, 44 × 100 × 30, bonding the two root tubes where the straight spars meet in a shallow V (`center_fitting()`). | — |
-| `avionics` | Boxes of the real parts' sizes (`components()`: label → host, center, size): `battery` (Flywoo 4S2P Li-ion, 145 × 45 × 45 estimated, `BATTERY_CENTER` = (227, 0, 0), the CG trim), `computer` (Pi 5 + AI HAT+, `COMPUTER_CENTER`, nose), `flight_controller`, `receiver`, `gps` (boom, `x = 700`, above the boom tube), `esc_*`, `aileron_servo_*`, `elevator_servo_*`, `rudder_servo`. Each sits inside its host with at least `SKIN` to spare, and none touches another. | — |
-| `landing_gear` | Two faired skids at `y = ±POD_Y`: a rail (ruled loft, Ø20, `RAIL_X` = 280 → 620, `z = SKID_Z = −125`) on one NACA 0025 strut, 60 mm chord, that runs up through the pod to just under the wing spar. Lowest point `GROUND_Z = −135`. | — |
+| `center_fitting` | Printed block inside the fuselage, 44 × 100 × 30 (`FITTING_SIZE`), bonding the two root tubes where the straight spars meet in a shallow V (`center_fitting()`). | — |
+| `avionics` | Boxes of the real parts' sizes (`components()`: label → host, center, size): `battery` (Flywoo 4S2P Li-ion, 145 × 45 × 45 estimated, `BATTERY_CENTER` = (227, 0, 0), the CG trim), `computer` (Pi 5 + AI HAT+, `COMPUTER_CENTER`, nose), `flight_controller` (`FLIGHT_CONTROLLER_CENTER`, where the wiring's mass is booked too), `receiver`, `gps` (boom, `x = 700`, above the boom tube), `esc_*`, `aileron_servo_*`, `elevator_servo_*`, `rudder_servo`. Each sits inside its host with at least `SKIN` to spare, and none touches another. | — |
+| `landing_gear` | Two faired skids at `y = ±POD_Y`: a rail (ruled loft, Ø20, `RAIL_X` = 280 → 620, `z = SKID_Z = −125`) on one NACA 0025 strut, 60 mm chord, that runs up through the pod to just under the wing spar (`strut_top()`). Lowest point `GROUND_Z = −135`. | — |
 | `gimbal_mount` | Short stem inside the nose above the ball. | — |
 | `gimbal` | Turret at `GIMBAL_CENTER = (170, 0, −72)`, ball `CAMERA_RADIUS` 32 half buried in the belly (hangs `CAMERA_EXPOSED` 29 below it): `camera` (ball), `thermal_lens`, `lens` (color), both looking 45° down and forward. | `rz` pan |
 
@@ -171,30 +165,31 @@ Hover limit (1.6× on a sagged pack): air down to 0.766 kg/m³, that is 12,000 f
 - CD0 breakdown: wing 43%, rear prop 10%, fuselage 9%, tail 7%, landing gear 7%, rear motor 7%, fin 5%, nacelles 5%, camera 4%, tilt servos 3%.
 - Propulsion check against T-Motor's measurements is unchanged: within 7% up to 60% throttle (tested).
 - Tilt servo: 8.3 kgf·cm at 7.2 V vs 5.5 kgf·cm load, 1.5× (`SERVO_MARGIN` 1.5). No spare.
+- Circling at the design point must last at least `LOITER_MINUTES` (45, a requirement in `README.md`); it lasts 48 (tested).
 - The best-endurance speed is pinned at the 1.3 × stall floor: the wing is working well below its best L/D (12 at CL ≈ 1.2). Treat drag-side numbers as ±20–30%; the skin-friction estimate is on the high side at these Reynolds numbers, so real flight times are more likely to be above these than below them.
 
 ## Parts list
 
-Checked 2026-11-05 (battery and payload 2026-11-09); links are in `parts.py`. Prices and stock change.
+Checked 2026-11-05 (battery and payload 2026-11-09); links are in `parts.py`. Prices, with links to sellers in stock, are in `README.md` (checked 2026-11-19); they and stock change.
 
 | Qty | Part | Mass | Notes |
 | --- | --- | --- | --- |
 | 3 | T-Motor AT2820 Long Shaft KV880 | 139 g | 3–4S, 45 A / 700 W for 180 s |
 | 2 + 1 | APC 12x6E (LP12060E) + 12x6EP (LP12060EP, reverse) | 27 g | 6.35 mm bore with adapter rings; a 5 mm ring for the motor shaft is unconfirmed. Buy spares |
 | 3 | Hobbywing XRotor Pro 50A | 56 g | 4–6S, 50 A continuous; PWM (OneShot unsupported) |
-| 1 | Flywoo Explorer 4S2P 9000 mAh Li-ion (Molicel P45B), XT60 | 573.5 g | Dimensions not published; 145 × 45 × 45 mm assumed from the cells. Listing says 45 A continuous, which reads as the per-cell figure (2 × 45 A = 90 A for the pack): confirm before relying on it |
+| 1 | Flywoo Explorer 4S2P 9000 mAh Li-ion (Molicel P45B), XT60 | 573.5 g | Dimensions not published; 145 × 45 × 45 mm assumed from the cells. Listing says 45 A continuous, which reads as the per-cell figure (2 × 45 A = 90 A for the pack): confirm before relying on it. Since sold with BAK P45D cells, same SKU and mass (2026-11-19): re-check the current rating |
 | 1 | Raspberry Pi 5 with AI HAT+ (13 TOPS) and active cooler | ≈ 82 g | Onboard detection. Board mass and loaded power unpublished, so estimated |
-| 1 | Teledyne FLIR Lepton 3.5 (160 × 120, 57° HFOV) on a GroupGets PureThermal 3 USB board | ≈ 6 g | Thermal camera, $164 + $120 for the board. Resolves ≈ 0.75 m per pixel at 120 m: a warm animal is a 1–2 pixel hot spot that points the color camera at it. Mass and power estimated |
+| 1 | Teledyne FLIR Lepton 3.5 (160 × 120, 57° HFOV) on a GroupGets PureThermal 3 USB board | ≈ 6 g | Thermal camera. Resolves ≈ 0.75 m per pixel at 120 m: a warm animal is a 1–2 pixel hot spot that points the color camera at it. Mass and power estimated |
 | 1 | Raspberry Pi Camera Module 3 | 4 g | Color camera, 66° HFOV |
 | 1 | Holybro Kakute H743-Wing | 28 g | ArduPilot `KakuteH7-Wing`, 14 PWM outputs (10 used), 90 A current sensor |
-| 1 | Matek M10Q-5883 GPS and compass | 8 g | Beware counterfeits |
+| 1 | Matek M10Q-5883 GPS and compass | 8 g | Discontinued (2026-11). `README.md` lists the Foxeer M10Q-180 V2 instead (18 × 18 × 8 mm, 7.5 g, fits the space); its plug is unchecked against the Kakute's GPS port |
 | 1 | RadioMaster RP3 V2 ExpressLRS | 4.6 g | |
 | 2 | KST X12-708 tilt servo | 20 g | 6.3 / 8.6 / 9.3 kgf·cm at 6 / 7.4 / 8.4 V; needs ≥ 6 V; often out of stock |
 | 2 | KST X08 Plus aileron servo | 9 g | 8 mm thick |
 | 3 | KST X06 V6.0 tail servo | 6 g | 7 mm thick |
 | — | Roll-wrapped carbon tubes, 1 mm wall: Ø16 × 14 (≈ 2.2 m), Ø18 × 16 (≈ 0.1 m), Ø14 × 12 (≈ 0.9 m joiners), Ø8 × 6 (≈ 0.3 m), Ø6 × 4 (≈ 0.4 m), Ø10 × 8 (skid struts), Ø12 × 10 (skid rails); Ø3 pins | — | Generic. The joiners need a close sliding fit in the Ø14 bores |
 
-Not chosen: wiring and connectors (130 g allowance), the turret's pan servo and bearing (60 g estimate), the skid tubes and fairings (90 g estimate).
+Not chosen: wiring and connectors (130 g allowance), the turret's pan servo and bearing (60 g estimate), the skid tubes and fairings (90 g estimate). The Kakute's 5 V regulator is rated 2 A, too little to also run the Pi 5, so `README.md` adds a 5 A one (Matek BEC12S-Pro); its mass isn't in the model.
 
 ## ArduPilot setup (checked against ardupilot.org's tilt-rotor and QuadPlane frame-setup pages, 2026-11-05)
 
@@ -220,7 +215,7 @@ Not chosen: wiring and connectors (130 g allowance), the turret's pan servo and 
 
 ## Printable airframe (`print_parts.py`)
 
-`printed_parts(vtol)` prepares each printed part, then `print_pieces(vtol)` cuts each separate solid into the fewest equal slabs across one axis that each fit `PRINT_BED` = 256 × 256 × 256 mm, giving 48 pieces. The wing and fuselage are first cut at the dry joints (`WING_JOINTS`, `BOOM_JOINT_X`), which are not glued.
+`printed_parts(vtol)` prepares each printed part, then `print_pieces(vtol)` cuts each separate solid into the fewest equal slabs across one axis that each fit `PRINT_BED` = 256 × 256 × 256 mm, giving 48 pieces. The wing and fuselage are first cut at the dry joints (`WING_CUTS`, every wing joint's y, and `BOOM_JOINT_X`), which are not glued. The hatch is cut where `vtol.hatch()` puts its seam lines.
 
 | Part | Prepared as | Cut across | Pieces |
 | --- | --- | --- | --- |
@@ -287,36 +282,178 @@ Not checked: flutter, wing twist, printed parts around the hinges and strut hole
 
 ## Renders (`render.py`)
 
-`python render.py` exports each part with its paint color to `out/render/`, then runs Blender (`BLENDER_DEFAULT`, or the `BLENDER` environment variable) on `render_scene.py`: `studio.png` on a light grey backdrop with soft area lights (the camera sees the backdrop, but reflections see a dark room, so black parts stay black; the rim light sits high so the wings don't mirror it), and `aerial.png` banked over a procedural pine forest. Dark parts are satin with a light clear coat. Cycles, 96 samples with denoising, 1600 × 900.
+`python -m drone.render` exports each part with its paint color to `out/render/` (`cad.export_parts` at 0.2 mm and 0.1 rad, about 54 MB), then runs Blender (`BLENDER_DEFAULT`, the standard install path for Windows or macOS, else `blender` on the PATH; or the `BLENDER` environment variable) on `render_scene.py`: `studio.png` on a light grey backdrop with soft area lights (the camera sees the backdrop, but reflections see a dark room, so black parts stay black; the rim light sits high so the wings don't mirror it), and `aerial.png` banked over a procedural pine forest. Dark parts are satin with a light clear coat. Cycles, 96 samples with denoising, 1600 × 900.
 
-## Flight simulator (`sim.py`, `sim/`)
+## Model page (`site/index.html`, `site/cad.js`)
 
-`python sim.py` writes `out/sim/aircraft.json` and a light mesh of the model (`render.export_parts` at 0.3 mm tolerance, internal parts left out), serves the project on `http://localhost:8123` (with a `.js` MIME fix for Windows, and `Cache-Control: no-cache` so a reload picks up edits and new exports) and opens `/sim/`. `python sim.py --serve` only serves. The page loads three.js 0.160.0 from jsDelivr, so it needs internet. It is a handling toy for getting a feel for the aircraft, not a test of ArduPilot or its settings.
+The website's front page: the VTOL as its CAD parts, to turn over in the browser, with a short description, its wingspan (from the meshes), weight (`mass`) and circling flight time (`loiter_minutes`, at 12,000 ft) from `site/data/aircraft.json`, and a link to the simulator. It loads `site/data/` through `aircraft.js`, which the simulator uses too: one mesh per part, smooth-shaded except across folds sharper than 40° (`CREASE`), each painted part tagged with the role (airframe, accents, details, skids) whose color it has (`paint` in `aircraft.json`).
+- Drag turns it, right-drag pans, and the wheel or a pinch zooms toward the pointer. It turns slowly on its own until the first touch.
+- Edges draws a light gray line along every fold sharper than `CREASE`, as a CAD viewer does (light so it shows on the black airframe): panel joins, seams, vents, trailing edges and part outlines.
+- X-ray makes the painted shell see-through (15%), showing the spars, battery, computer, servos and the rest inside; the part under the pointer is then picked through the shell.
+- Explode slides each part out from the middle to half its distance, or back, over 0.7 s.
+- The part under the pointer (or a tapped one) is tinted blue and named from its path, e.g. "tilt servo · motor right hinge · hinges".
+- The meshes are the simulator's (4.8 MB): every facet within 0.5 mm of the true surface, so the skins are smooth and the seam rings, built 0.3 mm proud of the surface, sit on them.
+- Opened as a file rather than from a server, it says to serve the folder.
 
-**Flight data (`aircraft(vtol)`), all in `DESIGN_AIR`:** mass, cruise CG and `balance.inertia`; the drag area `CD0·S` at the best-range speed; APC's `Ct`/`Cp` tables, the full-throttle rpm on a nominal 14.4 V pack and the motor test's efficiency curve; the usable battery energy; each motor's hinge, hub offset and spin; `min_speed` (1.3 × stall) and `max_speed` (`strength.MAX_SPEED`); skid and crash points. The wing (inner and outer panel each side), horizontal tail and fin are lifting panels at their mean-chord quarter points: Helmbold lift slope from aspect ratio, NACA 2412 zero-lift −2.1° and Cm −0.05, `CL_MAX` 1.2 (tail and fin 1.0), dihedral in the panel normals, and control effectiveness from thin-airfoil flap theory times the span the surface covers. Winglets are left out.
+## Flight simulator (`drone/sim.py`, `site/sim/`)
 
-**Flight model (`physics.js`):** a rigid body stepped at 400 Hz. Body axes are x forward, y right, z down; the world is north-east-down with the ground at z = 0. Each motor follows its throttle with an 80 ms lag (below 1 rpm it has stopped) and makes `Ct(J)` thrust along its tilted axis, with the prop's reaction torque. Each panel sees its local flow (rotation included); the tail also sees the wing's downwash `2CL/(πAR)`. Past `cl_max` lift falls to a flat plate's over 8°, with separated drag `1.2 sin²α`. Induced drag uses e = 0.8, and parasite drag acts at the CG. Skids are spring-dampers with friction. A skid arriving faster than 3 m/s, or any crash point touching the ground (nose, camera ball, wing tips, tail tips, tail pod), is a crash.
+`python -m drone.sim` serves `site/` on `http://localhost:8123` (with a `.js` MIME fix for Windows, and `Cache-Control: no-cache` so a reload picks up edits and new exports) and opens it; `--serve` only serves. `--export` first rewrites `site/data/`: `aircraft.json` and a mesh of every part (`cad.export_parts`: facets within 0.5 mm of the surface and turning at most 0.5 rad between neighbors; 66 parts, 4.8 MB), clearing the old meshes. `export_parts` meshes with an absolute deflection through OCP directly: build123d's `export_stl` takes it as a fraction of each edge's length, which left the big skins visibly faceted. The internal parts are drawn too, hidden inside the skin. `site/data/` is committed so `site/` can be hosted as static files. Exports aren't byte-identical from run to run (the CAD kernel's volume integrals and the boolean-cut panel lines vary in their last bits), so the server doesn't export by default; `test_sim.py` checks the committed `aircraft.json` against the model to 9 significant figures. The pages load three.js 0.160.0 from jsDelivr, so they need internet. It flies the design's mission by itself as a virtual flight test of the model's mass, inertia and aerodynamics; it is not a test of ArduPilot or its settings.
 
-**Flight controller (`control.js`)**, a simplified ArduPilot tilt-tricopter:
+**Flight data (`aircraft(vtol)`), all in `DESIGN_AIR`:** mass, cruise CG and `balance.inertia`; the drag area `CD0·S` at the best-range speed; APC's `Ct`/`Cp` tables, the full-throttle rpm on a nominal 14.4 V pack and the motor test's efficiency curve; the usable battery energy; each motor's hinge, hub offset and spin; `min_speed` (1.3 × stall) and `max_speed` (`strength.MAX_SPEED`); skid and crash points; the paint (`PAINT`, by role); and for `sensors.js`, each camera's field of view across and the thermal camera's pixels (`parts.py`); and for the model page, the circling flight time (`loiter_minutes`). The wing (inner and outer panel each side), horizontal tail and fin are lifting panels at their mean-chord quarter points (`balance.trapezoid`): Helmbold lift slope from aspect ratio, NACA 2412 zero-lift −2.1° and Cm −0.05, `CL_MAX` 1.2 (tail and fin 1.0), dihedral in the panel normals, and control effectiveness from thin-airfoil flap theory times the span the surface covers. Winglets are left out.
+
+**Flight model (`physics.js`):** a rigid body stepped at 400 Hz. Body axes are x forward, y right, z down; the world is north-east-down from the pad, with the ground at z = −`ground(north, east)` (`createModel(ac, ground)`; flat, z = 0, by default). Each motor follows its throttle with an 80 ms lag (below 1 rpm it has stopped) and makes `Ct(J)` thrust along its tilted axis, with the prop's reaction torque. Each panel sees its local flow (rotation included); the tail also sees the wing's downwash `2CL/(πAR)`. Past `cl_max` lift falls to a flat plate's over 8°, with separated drag `1.2 sin²α`. Induced drag uses e = 0.8, and parasite drag acts at the CG. Skids are spring-dampers with friction. Their spring pushes straight up against the depth below the terrain and friction acts horizontally, so the aircraft sits still on a slope: a friction law with no static range would creep downhill. A skid closing on the terrain faster than 3 m/s, measured along the slope's normal, is a crash. So is any crash point touching the ground (nose, camera ball, wing tips, tail tips, tail pod). On flat ground this is exactly the original flat-ground model: the flat-ground checks give bit-identical results. `newState` sits the aircraft as low as its skids allow, or starts it flying level at a given place, heading, speed and altitude. Telemetry gives `altitude` above the pad (like ArduPilot's, above home) and `height` above the ground below.
+
+**Flight controller (`control.js`)**, a simplified ArduPilot tilt-tricopter flown by sticks (pitch, roll, yaw, throttle, each −1..1):
 
 | Mode | What it does |
 | --- | --- |
-| `landed` | Motors stopped. W takes off. |
-| `hover` (like QLOITER) | Arrows set ground speed (6 m/s), W/S the climb rate (2.5 m/s, slowing to 0.7 m/s at touchdown), A/D the yaw rate. Holds altitude and heading. Lands after 0.5 s on the ground. |
+| `landed` | Motors stopped. Throttle up takes off. |
+| `hover` (like QLOITER) | Pitch and roll set ground speed (6 m/s), throttle the climb rate (2.5 m/s, slowing to 0.7 m/s at touchdown by height above the ground), yaw the yaw rate. Holds altitude and heading. Lands after 0.5 s on the ground. |
 | `transition` | Front motors tilt to 45° forward (`Q_TILT_MAX`) at 15°/s (`Q_TILT_RATE_UP`), holding altitude at 4° pitch, until `min_speed`. |
-| `plane` (like FBWB) | Arrows set bank (45°, less near stall: a level turn may use at most 1/1.4 of the wing's maximum lift) and climb rate (3 m/s), W/S the airspeed target, A/D the rudder. The front motors finish tilting forward while the rear motor balances their pitch moment, then it stops. |
+| `plane` (like FBWB) | Roll sets bank (45°, less near stall: a level turn may use at most 1/1.4 of the wing's maximum lift), pitch the climb rate (3 m/s), throttle the airspeed target, yaw the rudder. The front motors finish tilting forward while the rear motor balances their pitch moment, then it stops. |
 | `back` | Motors tilt up at 45°/s; brakes at 2.5 m/s² with at most 6° nose-up, so it doesn't balloon; then `hover`. |
 
-**Circling (O, like LOITER):** in `plane` the controller flies clockwise circles of `ORBIT_RADIUS` (75 m, from `performance.py`) around the hiker and climbs or descends at up to 3 m/s to `ORBIT_HEIGHT` (100 m above the hiker, from `sim.py`: under the 120 m / 400 ft drone ceiling), then holds it. ↑/↓ still dive and climb, and it holds the height where you let go; W/S keep the airspeed. It steers for the circle's tangent, turned toward the circle (45° from one radius off), plus the steady bank of a 75 m turn once on it (18° at 15.5 m/s). Pressing O in hover starts a transition first; T or O again stops it.
+**Circling (like LOITER):** in `plane` the controller flies clockwise circles of `ORBIT_RADIUS` (75 m, from `performance.py`) around a point and climbs or descends at up to 3 m/s to `ORBIT_HEIGHT` above the ground there (100 m, from `sim.py`: under the 120 m / 400 ft drone ceiling), then holds that altitude. **Following:** given a moving `target` (the page passes the hiker's latest phone fix every step), the circle's center moves to it and the held altitude moves by the change in the ground's height under it, so the circle stays over him as he walks. With no target it circles a fixed point, as before. Over sloping ground the height above the ground below varies round the circle. The pitch stick still climbs and dives, and it holds the height where the stick centers, then follows the ground from there; the throttle keeps the airspeed. It steers for the circle's tangent, turned toward the circle (45° from one radius off), plus the steady bank of a 75 m turn once on it (18° at 15.5 m/s). On a fixed circle the bank holds steady; following the walking hiker it varies smoothly once a lap (about 18–28°), since it flies faster past him on one side than the other. Turning circling on in hover starts a transition first; turning it on again stops it.
 
-The multicopter mixer solves for the thrusts from each motor's full lift, roll and pitch per newton at its tilt, and cuts lift before attitude when a motor saturates. A tilting motor's thrust is capped at 1.5 sin(tilt) of full, so it doesn't push forward while still near horizontal. Yaw comes from tilting the front motors opposite ways (up to `YAW_TILT`). With airspeed (6 → 12 m/s) the control surfaces take over the attitude moments. Surface gains scale with dynamic pressure through each control's moment per radian per pascal (`controlPower`). T toggles the transition. C switches between the chase camera and the hiker's eyes (you stand 15 m south and 6 m west of the pad), R restarts, P pauses and H hides the key help. The world is flat grass (a mipmapped, low-contrast texture, steady into the distance), the pad and the hiker. The grass and then the pad are drawn first and write no depth, so the pad, lying on the grass, can't flicker against it. The instruments show mode, airspeed, altitude, climb, heading, throttle, tilt, battery power and charge left.
+**The page's flight (`missionStart`, `missionInput`):** it starts already circling: on the circle round the hiker's first phone fix, 100 m above the ground there, flying clockwise at `min_speed` with the controller trimmed for it. It follows his fixes to the lake and circles him there. Takeoff and transition aren't on the page; the trip test still flies them. `check.mjs` flies the same start. Starting in the air, it circles for 56 minutes in world 1 before the battery reaches its 20% reserve (111 W on average).
 
-**Tested (`test_sim.py` through `node sim/check.mjs`):**
+The multicopter mixer solves for the thrusts from each motor's full lift, roll and pitch per newton at its tilt, and cuts lift before attitude when a motor saturates. A tilting motor's thrust is capped at 1.5 sin(tilt) of full, so it doesn't push forward while still near horizontal. Yaw comes from tilting the front motors opposite ways (up to `YAW_TILT`). With airspeed (6 → 12 m/s) the control surfaces take over the attitude moments. Surface gains scale with dynamic pressure through each control's moment per radian per pascal (`controlPower`). The surfaces' roll-rate loop is stiff (`GAIN.planeRate`), because the wing's own roll damping is large: with a weak loop the rate integrator does the work, so banks lag and then overshoot, and circling rocked side to side every 10 s. A 45° bank settles in about 2 s, 2–3° over.
+
+**The page (`app.js`, `index.html`):** no controls; it flies `missionInput` over a generated world (below), and `?seed=N` picks the world.
+- The chase view fills the left three quarters, centered on the aircraft from 4.5 m behind its heading and 1.5 m up (and at least 0.5 m above the ground).
+- The right quarter shows:
+  - the mode;
+  - the color camera's view: the turret's aim (`sensors.turret`) at the camera's 66° across, with the airframe hidden;
+  - the readings: airspeed, height above the ground, distance from the hiker, power, battery, the air, and the hiker's progress;
+  - the map (below), with what the cameras found under it, and a link back to the model page.
+- In portrait the chase view sits on top, and below it the camera and readings sit beside the map.
+- Both views are drawn on one canvas that fills the window, cleared to the panel's color, into the boxes of `#view` and `#camera` (viewport and scissor), at about 6 ms of script a frame.
+- A message over the chase view shows "Loading the model…" until the page is ready, and while they apply: a crash, STALL, the battery's 20% reserve and the bear warning (6 s).
+
+**Tested (`test_sim.py` through `node tests/check.mjs`):**
+- The committed `site/data/aircraft.json` matches the model.
 - Hover thrusts are within 0.4% of `hover_shares` (2% allowed); hover power is 531 W, matching `performance.hover` (3% allowed).
-- Every key does what the help says: in hover ↑ moves forward, → moves right, D yaws right and W climbs; in plane ↑ dives, → turns right, D yaws right and W speeds up.
+- The sticks move it the right way: in hover, pitch forward moves forward, roll right moves right, yaw right turns right and throttle up climbs; in plane, pitch forward dives, roll right turns right, yaw right turns right and throttle up speeds up.
 - Level flight at 15.5 m/s in design air draws 96.6 W against `performance.cruise`'s 96.5 W (10% allowed).
-- Circling a point 150 m away from level flight at 40 m climbs to and holds 100 m, settles on a 74.6 m circle (never more than 1.3 m off), clockwise, and draws 113 W against `mission`'s 113 W loiter power (10% allowed). Holding ↑ for 5 s while circling lowers the held height to 86 m, and it stays circling there.
+- Circling a point 150 m away from level flight at 40 m climbs to and holds 100 m, settles on a 74.6 m circle (never more than 0.5 m off), clockwise, and draws 113 W against `mission`'s 113 W loiter power (10% allowed). Holding the pitch stick forward for 5 s while circling lowers the held height to 86 m, and it stays circling there.
 - A whole trip works: take off to 39 m, transition in 4.5 s, fly on for 90 s (long enough for the stopped rear motor to spin all the way down), back-transition (peaking 7 m higher), hover and land, with no crash.
+- On made-up terrain:
+  - Landed on a 5° slope, it moves 1e-17 m in a minute (1 cm allowed).
+  - It lands on that slope from 10 m up, and on a valley floor 30 m below the pad. Easing the descent by altitude above the pad instead of height above the ground would climb there.
+  - Circling over ground 20 m up, it holds 120 m.
+  - Flying level into a 30° ridge, it crashes ("hit the ground").
+- Generated worlds (seeds 1, 2, 3, 0 and −7):
+  - The same seed gives the same heights and trees.
+  - The pad's clearing is flat: 0 m within 8 m.
+  - Trails are 708–888 m long, at most 0.16 steep over 20 m, and end 1.7–2.0 m above the water.
+  - Trees stand at least 5 m from the trail, 35 m from the pad and 1.5 m above the water.
+  - Lakes cover 21,000–30,000 m², and the hills round the water disc stand 22–34 m above it.
+- The page's own flight, in seeds 1–3: circling the hiker from the start, following him until a minute after he reaches the lake (a 9.5–11.6 minute walk).
+  - It doesn't crash.
+  - From a minute and a half in, it averages 75.6–75.9 m from where he really is, never more than 15 m off the circle.
+  - It holds 100.4–100.6 m above the ground he stands on.
+  - It stays 72–113 m above the ground below, under the 120 m ceiling.
+  - A one-off run of seeds 1–20 gave the same: no crash, 65–113 m above the ground and at most 16 m off.
+- The cameras (`sensors.js`), in this model: 60 looks at an elk 75 m out from 100 m up, as when circling.
+  - It spans 2.46 thermal pixels; the thermal camera detects it in 40 looks and the color camera names it in all 60.
+  - Under full forest: 16 and 5. Behind a ridge, or behind the aircraft: none.
+  - ACQUIRE's curve gives even odds at the 50% point.
+- What the cameras find on those follow flights (seeds 1–3). A one-off run with ten dice streams per seed gave the ranges.
+  - The bear was named in all 30 runs, and the page's warning (`bearsAhead`) fired for it. Every warm rock flagged (120) was ruled out.
+  - The lake is mapped, and 92–94% of the ground within 150 m of the trail is covered.
+  - They name 10 of 12, 8 of 8 and 9–12 of 14 animals within 200 m of the trail, and 7–8 of 15 beyond.
+  - No pin is for an animal that was never in a camera's view.
 
-**Not modeled:** wind, prop wash and ground effect, pack voltage sag (thrust stays at the nominal pack's), terrain, and servo and airframe flex. The gains are hand-tuned for this model, not ArduPilot's.
+**Not modeled:** wind, prop wash and ground effect, pack voltage sag (thrust stays at the nominal pack's), air density with height (the air is 12,000 ft's everywhere), and servo and airframe flex. The gains are hand-tuned for this model, not ArduPilot's.
 
+## World (`site/sim/world.js`)
+
+`createWorld(seed)` generates the world the simulator flies over from a whole-number seed, the same every time, in about 0.3 s. The page reads `?seed=` from its address (1 without one). Points are metres north and east of the pad, heights metres above it. The physics, the page and `check.mjs` all use it, so what the aircraft touches is what is drawn.
+
+- **Heights:** a 3 × 3 km square (±`SIZE` = 1,500 m) sampled every 5 m (601 × 601), with the pad the middle sample.
+  - Rolling hills: value noise in 4 layers from 600 m, up to about ±40 m.
+  - Mountains: ridged noise rising from 1,000 m out to full height (100–260 m) at 1,450 m. They close the view and hide the world's edge, and are low enough that sky shows above them from the circle.
+  - A Gaussian basin 40 m deep with a 220 m radius holds the lake.
+  - The pad sits in a flat clearing: flat within 12 m, eased back into the hills by 35 m.
+- **Lake:** in the lowest of 24 spots 800–950 m from the pad, with water 8 m above the basin's bottom.
+  - The water is a disc 400 m round the basin's center. The hills along its edge stand well above it (tested), so only the lake shows.
+  - On the disc the water's surface is the ground, so the aircraft can sit on it. Elsewhere a hollow below the water's level stays dry.
+- **Trail:** from the pad toward the lake, with a point every 2 m.
+  - Its line is straight but bent by one wide arc (up to 250 m), an S (90 m) and wiggles (30 m), each fading out at both ends.
+  - Its heights follow the ground averaged over 80 m and start level with the pad for 25 m. They are cut and filled to at most 15% per 2 m, one pass each way.
+  - It ends where it would come within 1.5 m of the water.
+  - The grid is graded to it: flat within 3 m of the centerline, easing back into the hills by 22 m. `trailDistance(north, east)` gives the distance to it, capped at 30 m.
+- **Forest:** patches of noise (`forest(p)`, 0–1), giving 7,700–23,300 trees (seeds 1–20).
+  - Where it is dense, a tree stands on up to 85% of the spots of a jittered 9 m grid, 10–22 m tall.
+  - Trees grow below a treeline at 120 ± 25 m and on slopes under 0.7.
+  - They stand at least 5 m from the trail, 35 m from the pad and 1.5 m above the water.
+- **Ground (`ground(north, east)`):** flat across the two triangles of each cell, split along its south-west to north-east diagonal; past the edge, the edge's height. The page draws the grid with the same split.
+- **The hiker (`hikerAt(seconds)`):** walks the trail from 10 m along it and stops at the end, 9–13 minutes later.
+  - His speed is Tobler's hiking function for the grade: 6 exp(−3.5 |grade + 0.05|) km/h, 5.0 km/h on the flat.
+  - It gives his position, heading, metres walked, speed and whether he has arrived.
+  - The page starts his clock when the aircraft leaves the ground, and R resets it.
+- **His phone (`createBeacon(seed)`):** a fix once a second, off by an error that wanders round him.
+  - Each second the error keeps exp(−1/20) of itself (a 20 s time constant) and gains fresh Gaussian noise. Its spread is 3 m north and east, about a phone's GPS in the open.
+  - Circling follows the fixes, not him.
+- **Wildlife (`wildlifeAt(seconds)`):** from their own random stream, so they leave the rest of the world as it was.
+  - Kinds (`WILDLIFE`, m): elk 2.4 long and 1.5 tall, deer 1.6 and 1.0, bear 1.7 and 1.0, and sun-warmed rocks 1.4 and 0.8, which a thermal camera can take for animals.
+  - Placed along the hike:
+    - three herds of 3–6 elk in the open 50–250 m from the trail;
+    - up to five deer at the forest's edges 30–200 m from it;
+    - a bear 40–120 m from it, past the first 40% of the trail;
+    - four warm rocks in the open 30–200 m from it.
+  - Each spot keeps the animal's wander clear of water and inside the mountains, on a slope under 0.4. A rule that finds no spot in 400 tries places nothing: over 100 random seeds there were 9–18 elk, 1–5 deer, 0–1 bear and 4 rocks.
+  - Each animal wanders round its spot smoothly: elk up to 30 m (a herd together, each 4 m of its own), deer 20 m and the bear 40 m, at about 0.4 m/s, pausing now and then. Rocks stay put.
+  - `along(metres)` gives the trail's point that far along his walk.
+
+**Drawing (`app.js`):**
+- **Ground mesh:** a vertex on every sample, colored by rules:
+  - meadow in lush and dry patches (`meadow(p)`, 0–1: patches about 250 m across with 45 m ones in them), darker under forest;
+  - tundra above 100–150 m;
+  - worn brown within about 7 m of the trail;
+  - muddy at the shore and dark under the water;
+  - rock blending in on slopes from 37° to 53°;
+  - snow above 170–220 m where it isn't too steep.
+- **Grain:** keeps the ground sharp up close. `addGrain` multiplies the color by a generated, tiling noise texture (mean 0.5, ±16% typical) sampled in world position at four tile sizes: 0.8, 3.5, 15 and 70 m, each turned so the repeats don't line up. Mipmapping blends each size to its mean, no change, where it is finer than a screen pixel.
+- **Trail:** a strip of dirt 1.4 m wide, with its points every metre laid 6 cm above `ground()`. It is lifted rather than depth-offset: the logarithmic depth buffer writes depth from the shader, so `polygonOffset` would do nothing.
+- **Lake:** a slightly see-through Phong disc at the water's level.
+- **Trees:** one instanced mesh of 7-sided cones (crowns from 20% of the height, 22% as wide as the tree is tall) and one of trunks, sunk 30 cm so slopes don't show under them.
+- **Rocks:** 1,500 seeded rocks (one instanced mesh of lumpy icosahedra, mostly pebbles, a few up to about 1.4 m across, two-thirds buried) lie within 40 m of the pad. They stay at least 4 m from its center and 1.5 m from the trail.
+- **Animals:** boxes and cylinders: elk with antlers, deer at two thirds of an elk, a bulky dark bear, and a boulder for each warm rock. Each faces the way it's wandering.
+- Trees, rocks and animals are drawing only: the physics doesn't see them, and the aircraft flies through them.
+- **Pad:** a disc of rings every 25 cm, each point laid 3 cm above `ground()`.
+- **Hiker:** his legs swing a stride (1.5 m) per cycle as he walks.
+- **Sky:** the scene's background is a gradient from blue overhead to haze at the horizon. The fog, from 0.4 to 4 km, is that haze, so the far mountains fade into it.
+- The page uses a logarithmic depth buffer and an 8 km far plane.
+
+## Cameras (`site/sim/sensors.js`)
+
+A model of what the aircraft's cameras make of the world, not image processing: from each camera's resolution and the range, the pixels across a target; from those, the odds of detecting or recognizing it. The thresholds and canopy figures are assumptions, so its results hold "in this model".
+
+**The cameras (`aircraft.json`, from `parts.py`):**
+- FLIR Lepton 3.5 thermal camera: 160 × 120 pixels across 57°.
+- Raspberry Pi Camera Module 3: 66° across. A detector reads its frames at 1920 × 1080 (`DETECTOR`; the camera takes 4608 × 2592).
+- The turret only pans, so the cameras look 45° down (`TILT`). While circling, it pans toward the trail 150 m past the hiker (`LOOK_AHEAD`), sweeping ±45° either side of it (`SWEEP`) and back every 12 s (`SWEEP_SECONDS`), so its looks cover a wide strip ahead of him (held still on the trail, the cameras named under half as many animals); otherwise, the way the aircraft is heading (`turret`, which the page also draws the color camera's view from).
+
+**A look (`look`), once a second of sim time once airborne,** through `survey`, which the page and `check.mjs` both run:
+- **In view:** each animal or rock is checked against each camera's view, then for a line of sight. The ground is sampled every 10 m between them, short of the last 3 m.
+- **Size:** pixels are counted across the target's mean size, √(length × height), as newer NVESD work uses in place of the smallest dimension. Line pairs (cycles) are half the pixels.
+- **Odds:** each camera's per-look odds come from ACQUIRE's curve, P = (N/N50)^E / (1 + (N/N50)^E) with E = 2.7 + 0.7·N/N50, at Johnson's 50% points.
+  - The thermal camera detects at N50 = 1 cycle, finding a warm shape it can't name. Rocks count half (`WARM_ROCK`).
+  - The color camera recognizes at N50 = 4 cycles, naming it: elk, deer, bear or rock.
+  - Under trees the odds fall by 70% (thermal) or 90% (color) times the forest's density there (`CANOPY`).
+  - From 100 m up and 75 m out, an elk spans 2.5 thermal pixels (thermal detection about 0.67 a look) and 25 color ones. Thermal detection falls to even odds at about 150 m; color recognition at about 400 m.
+- **Report:** each report puts the target where the camera saw it, off by 1 m plus 1% of the range. The lake counts as mapped once its center is in the color camera's view within 600 m.
+
+**Sightings (`record`):** a pin per target, labelled warm until the color camera names it, at its latest reported place. Tracking is perfect: each animal keeps its own pin, where a real tracker would match reports by place. A rock the thermal camera flagged and the color camera named is a false alarm ruled out.
+
+**Coverage (`cover`):** the ground in 10 m cells (`CELL`, `cellAt`), each marked once inside the color camera's view and closer than where it would name an elk at even odds (about 400 m). The ground's folds are ignored.
+
+**The map (`app.js`):** in the panel, as wide as it is (600 canvas pixels, sharp on a 2× screen), drawn four times a second.
+- It shows the trail and 250 m round it, in the ground's colors under a light from the north-west, with the lake blue.
+- Ground the cameras haven't covered is darker.
+- Over it: the trail, the circle being flown, you (a white dot), the aircraft (an orange triangle) and the pins. Pins are lettered: E elk, D deer, B bear (red), ? unnamed, × a rock ruled out, L the lake.
+- A caption lists what was found, the false alarms ruled out, whether the lake is mapped, and the share of ground within 150 m of the trail covered (`nearTrail`, the same cells `check.mjs` scores).
+- A bear named within 150 m of the trail ahead of you (`BEAR_RANGE`, `bearsAhead`) shows a warning once, for 6 s; after that its red pin stays on the map.
+
+Sources for the criteria and curve: [Johnson's criteria](https://ipfs.ssi.eecc.de/ipns/en.wikipedia-on-ipfs.org/wiki/Johnson's_criteria), and ACQUIRE's curve as quoted in [US patent 7,149,652](https://image-ppubs.uspto.gov/dirsearch-public/print/downloadPdf/7149652) (checked 2026-11-18).
