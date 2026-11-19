@@ -5,10 +5,10 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from drone.balance import DESIGN_AIR, hover_shares
-from drone.performance import ELECTRONICS_WATTS, ORBIT_RADIUS, G, cruise, hover, mission, weight
-from drone.sim import ORBIT_HEIGHT, aircraft
-from drone.vtol import build_vtol
+from trailhawk.balance import DESIGN_AIR, hover_shares
+from trailhawk.performance import ELECTRONICS_WATTS, ORBIT_RADIUS, G, cruise, hover, mission, weight
+from trailhawk.sim import ORBIT_HEIGHT, aircraft
+from trailhawk.vtol import build_vtol
 
 NODE = shutil.which("node")
 SITE_DATA = Path(__file__).parents[1] / "site" / "data"
@@ -40,7 +40,7 @@ class SimTest(unittest.TestCase):
 
     def test_site_data_matches_the_model(self):
         saved = json.loads((SITE_DATA / "aircraft.json").read_text())
-        self.assertEqual(rounded(saved), rounded(self.aircraft), "site/data/ is out of date: python -m drone.sim --export")
+        self.assertEqual(rounded(saved), rounded(self.aircraft), "site/data/ is out of date: python -m trailhawk.sim --export")
 
     def test_hover_thrusts_match_the_balance(self):
         for (name, share), grams in zip(hover_shares(self.vtol).items(), self.results["hover"]["thrust_grams"]):

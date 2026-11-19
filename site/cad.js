@@ -1,5 +1,5 @@
 // The model page: the VTOL's CAD parts with their edges, to turn, zoom, see inside and pull apart.
-// aircraft.js loads them from data/ (written by drone/sim.py) in CAD axes (+X nose to tail,
+// aircraft.js loads them from data/ (written by trailhawk/sim.py) in CAD axes (+X nose to tail,
 // +Y right wing, +Z up, mm); the model group turns +Z to the scene's up.
 import * as THREE from "three";
 import { OrbitControls } from "three/addons/controls/OrbitControls.js";
@@ -17,7 +17,7 @@ let loaded;
 try {
   loaded = await loadAircraft("data/");
 } catch (error) {
-  message.textContent = "The model didn't load. Serve this folder over http (python -m drone.sim).";
+  message.textContent = "The model didn't load. Serve this folder over http (python -m trailhawk.sim).";
   throw error;
 }
 const { ac, meshes } = loaded;
@@ -54,7 +54,7 @@ const radius = box.getSize(new THREE.Vector3()).length() / 2;
 document.getElementById("specs").innerHTML = `
   <dt>Wingspan</dt><dd>${((box.max.y - box.min.y) / 1000).toFixed(1)} m</dd>
   <dt>Weight</dt><dd>${ac.mass.toFixed(1)} kg</dd>
-  <dt>Flight time</dt><dd>${Math.round(ac.loiter_minutes)} min circling</dd>`;
+  <dt>Flight time</dt><dd>${Math.round(ac.loiter_minutes)} min</dd>`;
 
 // Camera: orbit about the middle, zooming toward the pointer; slow turntable until the first touch
 const camera = new THREE.PerspectiveCamera(30, innerWidth / innerHeight, 10, 1e5);

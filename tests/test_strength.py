@@ -2,9 +2,9 @@ import unittest
 
 import numpy as np
 
-from drone.performance import weight
-from drone.strength import checks, landing_load_factor, lift_per_mm, limit_load_factor, wing_moment
-from drone.vtol import SPAR_END_Y, WING_JOINTS, WING_TIP_Y, build_vtol
+from trailhawk.performance import weight
+from trailhawk.strength import checks, landing_load_factor, lift_per_mm, limit_load_factor, wing_moment
+from trailhawk.vtol import SPAR_END_Y, WING_JOINTS, WING_TIP_Y, build_vtol
 
 
 class StrengthTest(unittest.TestCase):

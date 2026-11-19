@@ -1,8 +1,8 @@
 import unittest
 
-from drone.pack import PACK, field_sections, world_parts
-from drone.print_parts import fits_bed
-from drone.vtol import build_vtol
+from trailhawk.pack import PACK, field_sections, world_parts
+from trailhawk.print_parts import fits_bed
+from trailhawk.vtol import build_vtol
 
 
 class PackTest(unittest.TestCase):

@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
+  <!-- TH for Trailhawk: orange on the site's ink color -->
+  <rect width="32" height="32" rx="7" fill="#1b1f24"/>
+  <g fill="#ef6c1f">
+    <rect x="4" y="9" width="11" height="3.4"/>
+    <rect x="7.8" y="9" width="3.4" height="14"/>
+    <rect x="17" y="9" width="3.4" height="14"/>
+    <rect x="24.6" y="9" width="3.4" height="14"/>
+    <rect x="17" y="14.3" width="11" height="3.4"/>
+  </g>
+</svg>

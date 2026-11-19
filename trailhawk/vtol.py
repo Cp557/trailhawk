@@ -44,8 +44,8 @@ from build123d.topology.shape_core import downcast
 from OCP.BRepBuilderAPI import BRepBuilderAPI_Transform
 from OCP.TopLoc import TopLoc_Location
 
-from drone.cad import export_and_show, fin_plane, labeled, propeller, section, span_plane, surface
-from drone.parts import AILERON_SERVO, BATTERY, COMPUTER, ESC, FLIGHT_CONTROLLER, GPS, MOTOR, PROP, RECEIVER, TAIL_SERVO, TILT_SERVO
+from trailhawk.cad import export_and_show, fin_plane, labeled, propeller, section, span_plane, surface
+from trailhawk.parts import AILERON_SERVO, AIRSPEED, BATTERY, COMPUTER, ESC, FLIGHT_CONTROLLER, GPS, MOTOR, PROP, RECEIVER, TAIL_SERVO, TILT_SERVO
 
 WING_X = 390  # quarter chord of the straight inner panel
 WING_ROOT_Z = 60
@@ -106,6 +106,9 @@ CAMERA_RADIUS = 32
 CAMERA_EXPOSED = 29  # how far the ball hangs below the belly
 BATTERY_CENTER = (227, 0, 0)  # slide it along X to trim the center of gravity (balance.py)
 COMPUTER_CENTER = (108, 0, 4)
+AIRSPEED_SENSOR_CENTER = (40, 0, 0)  # in the nose, ahead of the computer
+PITOT_RADIUS = 2.5  # Matek's pitot tube (unpublished: estimate)
+PITOT_X = (-50, 20)  # from 50 mm ahead of the nose tip, in clean air, back into the nose to its sensor
 FLIGHT_CONTROLLER_CENTER = (420, 0, 20)
 
 # Fuselage cross-sections: (x, half width, half height, centerline z). A rounded pod tapering
@@ -416,6 +419,7 @@ def components():
     parts = {
         "battery": ("fuselage", Vector(BATTERY_CENTER), BATTERY["size"]),
         "computer": ("fuselage", Vector(COMPUTER_CENTER), COMPUTER["size"]),
+        "airspeed_sensor": ("fuselage", Vector(AIRSPEED_SENSOR_CENTER), AIRSPEED["size"]),
         "flight_controller": ("fuselage", Vector(FLIGHT_CONTROLLER_CENTER), FLIGHT_CONTROLLER["size"]),
         "receiver": ("fuselage", Vector(490, 0, 0), RECEIVER["size"]),
         "gps": ("fuselage", Vector(700, 0, 45), GPS["size"]),
@@ -427,6 +431,12 @@ def components():
         parts[f"aileron_servo_{side}"] = ("wing", flip(aileron_servo), lying(AILERON_SERVO["size"]))
         parts[f"elevator_servo_{side}"] = ("horizontal_tail", flip(elevator_servo), lying(TAIL_SERVO["size"]))
     return parts
+
+
+def pitot(radius=PITOT_RADIUS):
+    """The airspeed sensor's pitot tube along the nose's axis, over PITOT_X; with a larger `radius`, its
+    hole in the skin."""
+    return Pos(sum(PITOT_X) / 2, 0, 0) * Rot(0, 90, 0) * Cylinder(radius, PITOT_X[1] - PITOT_X[0])
 
 
 def hatch():
@@ -530,6 +540,7 @@ def build_vtol():
             Compound(label="avionics", children=avionics),
             labeled(landing_gear(), "landing_gear", PAINT["skids"]),
             labeled(Pos(GIMBAL_CENTER[0], 0, -32.5) * Cylinder(12, 15), "gimbal_mount", "dimgray"),
+            labeled(pitot(), "pitot", "silver"),
             gimbal(),
         ],
     )

@@ -5,6 +5,12 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Trailhawk · tri-tiltrotor VTOL drone</title>
 <meta name="description" content="Trailhawk, a tri-tiltrotor VTOL drone that circles over a hiker on high trails: the 3D model, built from real parts in Python.">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<meta property="og:title" content="Trailhawk">
+<meta property="og:description" content="A VTOL drone that takes off from the trail, circles above you and scouts ahead for wildlife. It packs into a backpack.">
+<meta property="og:image" content="https://trailhawk.vercel.app/trailhawk.jpg">
+<meta property="og:url" content="https://trailhawk.vercel.app/">
+<meta name="twitter:card" content="summary_large_image">
 <style>
   :root { --ink: #1b1f24; --muted: #5b6470; --panel: rgba(255, 255, 255, 0.8); --line: rgba(27, 31, 36, 0.12); }
   html, body { margin: 0; height: 100%; overflow: hidden; color: var(--ink); font: 15px/1.45 system-ui, -apple-system, "Segoe UI", sans-serif;
@@ -19,9 +25,11 @@
   #specs { display: grid; grid-template-columns: auto 1fr; gap: 2px 14px; margin: 0 0 14px; font-variant-numeric: tabular-nums; }
   #specs dt { color: var(--muted); }
   #specs dd { margin: 0; font-weight: 600; }
-  .fly { display: inline-block; padding: 8px 14px; border-radius: 8px; background: var(--ink); color: #fff; font-weight: 600; text-decoration: none; }
+  .links { display: flex; align-items: center; gap: 8px; }
+  .fly { padding: 8px 14px; border-radius: 8px; background: var(--ink); color: #fff; font-weight: 600; text-decoration: none; }
   .fly:hover { background: #343b44; }
-  .more { display: block; margin-top: 10px; color: var(--muted); font-size: 14px; }
+  .github { display: flex; padding: 7px; border: 1px solid var(--line); border-radius: 8px; color: var(--ink); }
+  .github:hover { border-color: rgba(27, 31, 36, 0.3); }
   #tools { left: 50%; bottom: 16px; transform: translateX(-50%); width: max-content; max-width: calc(100% - 32px); box-sizing: border-box;
     display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 6px; padding: 8px; }
   #tools button { font: inherit; font-size: 14px; padding: 6px 12px; border: 1px solid var(--line); border-radius: 8px; background: #fff; color: var(--ink); cursor: pointer; }
@@ -52,10 +60,18 @@
 <body>
 <section id="intro" class="panel">
   <h1>Trailhawk</h1>
-  <p>A tri-tiltrotor VTOL drone that takes off straight up, flies on its wing and circles over a hiker on high trails, scanning for wildlife with thermal and color cameras. Sized for 12,000 ft, it comes apart to fit a backpack. Modeled in Python with build123d from real, buyable parts.</p>
+  <p>A VTOL drone that takes off from the trail, circles above you and scouts ahead for wildlife. It packs into a backpack.</p>
   <dl id="specs"></dl>
-  <a class="fly" href="sim/">Fly it in the simulator &rarr;</a>
-  <a class="more" href="https://github.com/Cp557/trailhawk">Requirements, design and parts list &rarr;</a>
+  <div class="links">
+    <a class="fly" href="sim/">Watch it fly &rarr;</a>
+    <a class="github" href="https://github.com/Cp557/trailhawk" aria-label="Trailhawk on GitHub" title="Trailhawk on GitHub">
+      <!-- GitHub icon from Hugeicons (core-free-icons 4.4.0, MIT) -->
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M10 20.5675C6.57143 21.7248 3.71429 20.5675 2 17" />
+        <path d="M10 22V18.7579C10 18.1596 10.1839 17.6396 10.4804 17.1699C10.6838 16.8476 10.5445 16.3904 10.1771 16.2894C7.13394 15.4528 5 14.1077 5 9.64606C5 8.48611 5.38005 7.39556 6.04811 6.4464C6.21437 6.21018 6.29749 6.09208 6.31748 5.9851C6.33746 5.87813 6.30272 5.73852 6.23322 5.45932C5.95038 4.32292 5.96871 3.11619 6.39322 2.02823C6.39322 2.02823 7.27042 1.74242 9.26698 2.98969C9.72282 3.27447 9.95075 3.41686 10.1515 3.44871C10.3522 3.48056 10.6206 3.41384 11.1573 3.28041C11.8913 3.09795 12.6476 3 13.5 3C14.3524 3 15.1087 3.09795 15.8427 3.28041C16.3794 3.41384 16.6478 3.48056 16.8485 3.44871C17.0493 3.41686 17.2772 3.27447 17.733 2.98969C19.7296 1.74242 20.6068 2.02823 20.6068 2.02823C21.0313 3.11619 21.0496 4.32292 20.7668 5.45932C20.6973 5.73852 20.6625 5.87813 20.6825 5.9851C20.7025 6.09207 20.7856 6.21019 20.9519 6.4464C21.6199 7.39556 22 8.48611 22 9.64606C22 14.1077 19.8661 15.4528 16.8229 16.2894C16.4555 16.3904 16.3162 16.8476 16.5196 17.1699C16.8161 17.6396 17 18.1596 17 18.7579V22" />
+      </svg>
+    </a>
+  </div>
 </section>
 <div id="tools" class="panel" hidden>
   <button id="edges" aria-pressed="true">Edges</button>

@@ -9,9 +9,9 @@ from build123d import Compound
 from OCP.BRepGProp import BRepGProp
 from OCP.GProp import GProp_GProps
 
-from drone.cad import world_parts
-from drone.print_parts import X, Y, fits_bed, slices
-from drone.vtol import BOOM_JOINT_X, WING_CUTS, WING_JOINTS, build_vtol
+from trailhawk.cad import world_parts
+from trailhawk.print_parts import X, Y, fits_bed, slices
+from trailhawk.vtol import BOOM_JOINT_X, WING_CUTS, WING_JOINTS, build_vtol
 
 PACK = (700, 350, 260)  # mm, the usable inside of a 65 L backpacking pack
 

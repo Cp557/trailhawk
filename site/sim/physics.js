@@ -1,5 +1,5 @@
 // Flight model of the VTOL: a rigid body with three motors, lifting panels (wing, tail, fin),
-// parasite drag and skids. Data: site/data/aircraft.json, written by drone/sim.py.
+// parasite drag and skids. Data: site/data/aircraft.json, written by trailhawk/sim.py.
 // Units SI. Body axes: x forward, y right, z down, origin at the CG. World axes: north, east,
 // down, origin at the pad; the ground is at z = -ground(north, east). CAD axes (mm): X aft, Y right, Z up.
 

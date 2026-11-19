@@ -1,6 +1,6 @@
 // The simulator page: the VTOL flies its mission by itself (control.js's missionStart), stepping
 // physics.js and control.js at 400 Hz, drawn with three.js: a chase view on the left, and on the
-// right its camera's view, its readings and the map. Data from ../data/ (written by drone/sim.py);
+// right its camera's view, its readings and the map. Data from ../data/ (written by trailhawk/sim.py);
 // the aircraft's parts come through ../aircraft.js, shared with the model page.
 import * as THREE from "three";
 import { mergeVertices } from "three/addons/utils/BufferGeometryUtils.js";

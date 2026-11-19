@@ -3,8 +3,8 @@ from math import pi
 
 from build123d import Box, Cylinder, Location, Pos, Rot
 
-from drone import fly
-from drone.vtol import (
+from trailhawk import fly
+from trailhawk.vtol import (
     GROUND_Z, HINGE_UP, HUB_X, MOTORS, PROP_GAP, PROP_RADIUS, SKIN, TILTING, YAW_TILT, build_vtol, components, hinge,
     spar_lines, tube,
 )  # fmt: skip
@@ -43,7 +43,7 @@ class VtolTest(unittest.TestCase):
         expected = {
             "/fuselage", "/wing", "/horizontal_tail", "/fin",
             "/aileron_right", "/aileron_left", "/elevator_right", "/elevator_left", "/rudder",
-            "/nacelles", "/tail_nacelle", "/landing_gear", "/center_fitting", "/details", "/gimbal_mount", "/gimbal/camera", "/gimbal/lens", "/gimbal/thermal_lens",
+            "/nacelles", "/tail_nacelle", "/landing_gear", "/center_fitting", "/details", "/gimbal_mount", "/pitot", "/gimbal/camera", "/gimbal/lens", "/gimbal/thermal_lens",
             *(f"/{motor}/{part}" for motor in MOTORS for part in ("mount", "motor", "prop_nut", "propeller")),
             *(f"/hinges/{motor}_hinge/{part}" for motor in MOTORS for part in ("bearing", "hinge_pin")),
             *(f"/hinges/{motor}_hinge/tilt_servo" for motor in TILTING),

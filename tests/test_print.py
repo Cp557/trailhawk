@@ -4,8 +4,8 @@ from build123d import Box, Pos
 from OCP.BRepGProp import BRepGProp
 from OCP.GProp import GProp_GProps
 
-from drone.print_parts import fits_bed, print_pieces, printed_parts
-from drone.vtol import build_vtol, components, spar_lines, tube
+from trailhawk.print_parts import fits_bed, print_pieces, printed_parts
+from trailhawk.vtol import build_vtol, components, spar_lines, tube
 
 
 def volume(shape):

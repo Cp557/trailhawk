@@ -15,8 +15,8 @@ from build123d import Compound, Location, Pos, Rot, Vector
 from OCP.BRepGProp import BRepGProp
 from OCP.GProp import GProp_GProps
 
-from drone.parts import AILERON_SERVO, BATTERY, COLOR_CAMERA, COMPUTER, ESC, FLIGHT_CONTROLLER, GPS, MOTOR, PROP, RECEIVER, TAIL_SERVO, THERMAL_CAMERA, TILT_SERVO
-from drone.vtol import (
+from trailhawk.parts import AILERON_SERVO, AIRSPEED, BATTERY, COLOR_CAMERA, COMPUTER, ESC, FLIGHT_CONTROLLER, GPS, MOTOR, PROP, RECEIVER, TAIL_SERVO, THERMAL_CAMERA, TILT_SERVO
+from trailhawk.vtol import (
     FLIGHT_CONTROLLER_CENTER, HINGE_UP, HUB_X, MOTORS, SKIN, TILTING, WING_TIP_Y, build_vtol, chord_point, fin_stations,
     hinge, lerp, spar_lines, tail_stations, wing_stations,
 )  # fmt: skip
@@ -31,7 +31,7 @@ GRAMS = {
     # bought parts (parts.py)
     "motor": MOTOR["grams"], "propeller": PROP["grams"], "tilt_servo": TILT_SERVO["grams"],
     "battery": BATTERY["grams"], "flight_controller": FLIGHT_CONTROLLER["grams"], "computer": COMPUTER["grams"],
-    "receiver": RECEIVER["grams"], "gps": GPS["grams"],
+    "receiver": RECEIVER["grams"], "gps": GPS["grams"], "airspeed_sensor": AIRSPEED["grams"],
     "esc_right": ESC["grams"], "esc_left": ESC["grams"], "esc_tail": ESC["grams"],
     "aileron_servo_right": AILERON_SERVO["grams"], "aileron_servo_left": AILERON_SERVO["grams"],
     "elevator_servo_right": TAIL_SERVO["grams"], "elevator_servo_left": TAIL_SERVO["grams"],
@@ -40,6 +40,7 @@ GRAMS = {
     "prop_nut": 5, "mount": 8, "bearing": 2, "hinge_pin": 1, "landing_gear": 90, "gimbal_mount": 10,
     "center_fitting": 45,  # printed nylon block, partly hollow
     "details": 2,  # paint on the panel lines
+    "pitot": 2,  # aluminum tube
     "camera": 60,  # turret: ball shell, pan servo and bearing
     "thermal_lens": THERMAL_CAMERA["grams"], "lens": COLOR_CAMERA["grams"],
 }  # fmt: skip

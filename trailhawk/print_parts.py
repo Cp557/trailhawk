@@ -17,8 +17,8 @@ from operator import add
 import numpy as np
 from build123d import Box, Compound, Keep, Plane, Pos, Sphere, export_stl, split
 
-from drone.cad import OUT_DIR, labeled, show_in_viewer
-from drone.vtol import BOOM_JOINT_X, CAMERA_RADIUS, GIMBAL_CENTER, MOTORS, SKIN, WING_CUTS, build_vtol, components, fuselage, hatch, nacelle, spar_lines, tube
+from trailhawk.cad import OUT_DIR, labeled, show_in_viewer
+from trailhawk.vtol import BOOM_JOINT_X, CAMERA_RADIUS, GIMBAL_CENTER, MOTORS, PITOT_RADIUS, SKIN, WING_CUTS, build_vtol, components, fuselage, hatch, nacelle, pitot, spar_lines, tube
 
 PRINT_BED = (256, 256, 256)  # mm, e.g. a Bambu Lab X1, P1 or A1
 FIT = 0.15  # radial clearance around the spar tubes
@@ -104,7 +104,7 @@ def printed_parts(vtol):
     hatch_start, hatch_end, hatch_z = hatch()
     hatch_box = Pos((hatch_start + hatch_end) / 2, 0, hatch_z + 100) * Box(hatch_end - hatch_start, 400, 200)
     turret_opening = Pos(*GIMBAL_CENTER) * Sphere(CAMERA_RADIUS + 1.5)
-    shell = outer - fuselage(SKIN) - channels - turret_opening
+    shell = outer - fuselage(SKIN) - channels - turret_opening - pitot(PITOT_RADIUS + FIT)
     fuselage_sleeves = sleeves(fuselage(SKIN), fuselage(SKIN + SLEEVE[1]), lambda shape: shape - hatch_box - channels)
 
     def nacelle_trim(shape):

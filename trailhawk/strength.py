@@ -11,9 +11,9 @@ from math import pi
 
 import numpy as np
 
-from drone.balance import G, SEA_LEVEL, mass_items, mean_aerodynamic_chord, trapezoid
-from drone.performance import NOMINAL_VOLTS, max_static, weight, wing_reference
-from drone.vtol import (
+from trailhawk.balance import G, SEA_LEVEL, mass_items, mean_aerodynamic_chord, trapezoid
+from trailhawk.performance import NOMINAL_VOLTS, max_static, weight, wing_reference
+from trailhawk.vtol import (
     BOOM_JOINT_X, BOOM_RADIUS, BOOM_SOCKET_RADIUS, BOOM_SOCKET_START, FITTING_SIZE, JOINER_EMBED, JOINER_RADIUS, MOTORS,
     POD_Y, RAIL_X, SKID_Z, SKIN, SPAR_END_Y, SPAR_RADIUS, WING_JOINTS, WING_TIP_Y, build_vtol, fin_stations, hinge,
     strut_top, tail_stations, wing_stations,

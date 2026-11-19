@@ -1,6 +1,6 @@
 """The website's data and local server: the model page and the browser flight simulator.
 
-`python -m drone.sim` serves site/ at http://localhost:8123/ and opens it: the model page, with
+`python -m trailhawk.sim` serves site/ at http://localhost:8123/ and opens it: the model page, with
 the flight simulator at /sim/. `--export` first rewrites site/data/ from the model: the flight data
 (aircraft.json) and a light mesh of every part (one STL each, listed in parts.json), which both pages
 load. site/data/ is committed, so the site can be hosted as static files; re-export after changing
@@ -22,15 +22,15 @@ from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
 from math import acos, pi, sin, sqrt
 from pathlib import Path
 
-from drone.balance import CL_MAX, DESIGN_AIR, G, center_of_gravity, inertia, mass_items, stall_speed, trapezoid
-from drone.cad import export_parts
-from drone.performance import (
+from trailhawk.balance import CL_MAX, DESIGN_AIR, G, center_of_gravity, inertia, mass_items, stall_speed, trapezoid
+from trailhawk.cad import export_parts
+from trailhawk.performance import (
     ADVANCE, DIAMETER, ELECTRONICS_WATTS, NOMINAL_VOLTS, ORBIT_RADIUS, OSWALD, POWER_COEFFICIENT, SPEED_MARGIN, THRUST_COEFFICIENT, max_static,
     mission, motor_test, parasite_drag_area, rpm_for_thrust, wing_reference,
 )  # fmt: skip
-from drone.parts import COLOR_CAMERA, THERMAL_CAMERA
-from drone.strength import MAX_SPEED, TAIL_CL_MAX
-from drone.vtol import (
+from trailhawk.parts import COLOR_CAMERA, THERMAL_CAMERA
+from trailhawk.strength import MAX_SPEED, TAIL_CL_MAX
+from trailhawk.vtol import (
     AILERON, CAMERA_RADIUS, ELEVATOR, FIN_TIP_Z, GIMBAL_CENTER, GROUND_Z, HINGE_UP, HUB_X, MOTORS, PAINT, POD_Y, RAIL_X, RUDDER, TILTING, YAW_TILT,
     build_vtol, chord_point, fin_stations, hinge, lerp, tail_stations, wing_stations,
 )  # fmt: skip

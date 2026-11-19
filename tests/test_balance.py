@@ -1,10 +1,10 @@
 import unittest
 
-from drone.balance import (
+from trailhawk.balance import (
     CG_RANGE, FIN_VOLUME_RANGE, TAIL_VOLUME_RANGE, center_of_gravity, cg_fraction, hover_shares, inertia, mass_items,
     mean_aerodynamic_chord, tail_volumes,
 )  # fmt: skip
-from drone.vtol import build_vtol, chord_point, wing_stations
+from trailhawk.vtol import build_vtol, chord_point, wing_stations
 
 
 class BalanceTest(unittest.TestCase):

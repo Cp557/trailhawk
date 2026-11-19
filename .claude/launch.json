@@ -17,7 +17,7 @@
       "runtimeExecutable": ".venv/bin/python",
       "runtimeArgs": [
         "-m",
-        "drone.sim",
+        "trailhawk.sim",
         "--serve"
       ],
       "port": 8123

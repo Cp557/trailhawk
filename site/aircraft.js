@@ -1,5 +1,5 @@
 // The VTOL's parts as three.js meshes, for the model page (cad.js) and the simulator (sim/app.js).
-// `data` is the folder drone/sim.py writes: aircraft.json (flight data and the paint's colors by
+// `data` is the folder trailhawk/sim.py writes: aircraft.json (flight data and the paint's colors by
 // role) and one STL per part in CAD mm (+X nose to tail, +Y right wing, +Z up), listed in parts.json.
 import * as THREE from "three";
 import { STLLoader } from "three/addons/loaders/STLLoader.js";

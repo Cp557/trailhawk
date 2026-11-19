@@ -13,9 +13,9 @@ from math import acos, log10, pi, sqrt
 
 import numpy as np
 
-from drone.balance import DESIGN_AIR, G, GRAMS, SEA_LEVEL, Air, hover_shares, mass_items, mean_aerodynamic_chord, stall_speed
-from drone.parts import BATTERY, COLOR_CAMERA, COMPUTER, FLIGHT_CONTROLLER, MOTOR, PROP, THERMAL_CAMERA, TILT_SERVO
-from drone.vtol import (
+from trailhawk.balance import DESIGN_AIR, G, GRAMS, SEA_LEVEL, Air, hover_shares, mass_items, mean_aerodynamic_chord, stall_speed
+from trailhawk.parts import BATTERY, COLOR_CAMERA, COMPUTER, FLIGHT_CONTROLLER, MOTOR, PROP, THERMAL_CAMERA, TILT_SERVO
+from trailhawk.vtol import (
     CAMERA_EXPOSED, CAMERA_RADIUS, CAN_LENGTH, FUSELAGE, HINGE_UP, MOTORS, NACELLE, POD_RADIUS, PROP_RADIUS,
     SHAFT_OUT, STRUT_CHORD, TILTING, WING_TIP_Y, YAW_TILT, build_vtol, fin_stations, tail_stations,
 )  # fmt: skip

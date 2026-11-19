@@ -10,8 +10,8 @@ import subprocess
 import sys
 from pathlib import Path
 
-from drone.cad import OUT_DIR, export_parts
-from drone.vtol import build_vtol
+from trailhawk.cad import OUT_DIR, export_parts
+from trailhawk.vtol import build_vtol
 
 BLENDER_DEFAULT = {
     "win32": r"C:\Program Files\Blender Foundation\Blender 5.2\blender.exe",

@@ -1,6 +1,6 @@
 """Animate the VTOL in the OCP CAD Viewer.
 
-Start the viewer first (`python -m ocp_viewer`), then run `python -m drone.fly`. The 27 s loop:
+Start the viewer first (`python -m ocp_viewer`), then run `python -m trailhawk.fly`. The 27 s loop:
 spool up on the pad, vertical climb, transition to wing-borne flight, one banked left lap,
 transition back to hover over the pad, descent and landing. The front motors tilt; the fixed
 rear motor runs only while hovering.
@@ -14,8 +14,8 @@ from math import cos, pi, radians, sin
 from build123d import Align, Cylinder, Pos
 from ocp_vscode import Animation
 
-from drone.cad import labeled, show_in_viewer
-from drone.vtol import GROUND_Z, MOTORS, TILTING, build_vtol
+from trailhawk.cad import labeled, show_in_viewer
+from trailhawk.vtol import GROUND_Z, MOTORS, TILTING, build_vtol
 
 FPS = 10  # keyframes per second
 DURATION = 27

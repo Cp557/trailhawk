@@ -111,6 +111,13 @@ FLIGHT_CONTROLLER = {
     "servo_volts": 7.2,
 }
 
+AIRSPEED = {
+    "name": "Matek ASPD-4525 digital airspeed sensor (TE 4525DO, I2C), with pitot tube and silicone tubing",
+    "url": "https://www.mateksys.com/?p=7212",
+    "grams": 3.5,  # sensor board; the pitot tube is an estimate in balance.GRAMS
+    "size": (26, 16, 8),  # board size unpublished: estimate
+}
+
 GPS = {
     "name": "Matek M10Q-5883 (u-blox M10 GPS, QMC5883L compass)",
     "url": "https://www.mateksys.com/?portfolio=m10q-5883",

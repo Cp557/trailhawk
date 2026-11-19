@@ -1,13 +1,13 @@
 import unittest
 
-from drone.balance import DESIGN_AIR, SEA_LEVEL, Air, stall_speed
-from drone.parts import BATTERY, ESC, MOTOR, TILT_SERVO
-from drone.performance import (
+from trailhawk.balance import DESIGN_AIR, SEA_LEVEL, Air, stall_speed
+from trailhawk.parts import BATTERY, ESC, MOTOR, TILT_SERVO
+from trailhawk.performance import (
     G, HOVER_SECONDS, LOITER_MINUTES, SAG_CELL_VOLTS, SERVO_MARGIN, SPEED_MARGIN, THRUST_MARGIN, heaviest_takeoff, hottest_day, hover,
     hover_need, max_static, mission, motor_test, parasite_drag_area, prop_power, prop_thrust, speeds, tilt_servo_load, tilt_servo_torque,
     thinnest_air, weight, wing_reference,
 )  # fmt: skip
-from drone.vtol import YAW_TILT, build_vtol
+from trailhawk.vtol import YAW_TILT, build_vtol
 
 
 class PerformanceTest(unittest.TestCase):
