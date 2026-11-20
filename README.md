@@ -8,6 +8,8 @@ It is designed, analyzed and flight-simulated, and ready to build. Every bought 
 
 **See it live:** [the 3D model](https://trailhawk.vercel.app) and [the flight simulator](https://trailhawk.vercel.app/sim/).
 
+https://github.com/user-attachments/assets/87b11afc-68f0-41d6-926a-9ad91a905b2e
+
 ## The problem
 
 On a high trail you can't see past the next ridge, where there might be elk, moose or a bear. A small drone overhead could look ahead, but it has to take off from a trail with no runway, fly long enough to follow a hike in thin mountain air, and pack into a backpack. It also has to be buildable at home from parts you can buy.

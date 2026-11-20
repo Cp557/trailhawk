@@ -1,14 +1,16 @@
 // The simulator page: the VTOL flies its mission by itself (control.js's missionStart), stepping
 // physics.js and control.js at 400 Hz, drawn with three.js: a chase view on the left, and on the
-// right its camera's view, its readings and the map. Data from ../data/ (written by trailhawk/sim.py);
-// the aircraft's parts come through ../aircraft.js, shared with the model page.
+// right its camera's view (color or thermal, with what it detects boxed), its readings and the map.
+// Data from ../data/ (written by trailhawk/sim.py); the aircraft's parts come through ../aircraft.js,
+// shared with the model page.
 import * as THREE from "three";
-import { mergeVertices } from "three/addons/utils/BufferGeometryUtils.js";
+import { Sky } from "three/addons/objects/Sky.js";
+import { mergeGeometries, mergeVertices } from "three/addons/utils/BufferGeometryUtils.js";
 import { loadAircraft } from "../aircraft.js";
 import { missionInput, missionStart, update } from "./control.js";
 import { DT, clamp, createModel, degrees, euler, motorPose, radians, rotate, step, telemetry, wrap } from "./physics.js";
 import { cameras, cellAt, createCoverage, nearTrail, survey, turret } from "./sensors.js";
-import { CELLS, SIZE, SPACING, createBeacon, createWorld, distance, samplePoint, seeded, smoothstep } from "./world.js";
+import { CELLS, SIZE, SPACING, WILDLIFE, createBeacon, createWorld, distance, samplePoint, seeded, smoothstep } from "./world.js";
 
 const DATA = "../data/";
 const CHASE = [4.5, 1.5]; // chase camera distance behind and height above the aircraft (m)
@@ -29,31 +31,40 @@ const renderer = new THREE.WebGLRenderer({ antialias: true, logarithmicDepthBuff
 renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
 renderer.setSize(innerWidth, innerHeight);
 renderer.shadowMap.enabled = true;
+renderer.toneMapping = THREE.ACESFilmicToneMapping; // film-like highlights; the sky needs the low exposure
+renderer.toneMappingExposure = 0.5;
 renderer.domElement.id = "scene";
 document.body.prepend(renderer.domElement);
 const scene = new THREE.Scene();
-// The sky: blue overhead, fading to haze at the horizon, which is the fog's color, so the far
-// mountains fade into it
-function skyTexture() {
-  const canvas = Object.assign(document.createElement("canvas"), { width: 2, height: 256 });
-  const pen = canvas.getContext("2d");
-  const fade = pen.createLinearGradient(0, 0, 0, 256);
-  [[0, "#3c74bd"], [0.4, "#9dbfe0"], [0.5, "#cad8e4"], [1, "#cad8e4"]].forEach(([at, color]) => fade.addColorStop(at, color));
-  pen.fillStyle = fade;
-  pen.fillRect(0, 0, 2, 256);
-  return Object.assign(new THREE.CanvasTexture(canvas), { mapping: THREE.EquirectangularReflectionMapping, colorSpace: THREE.SRGBColorSpace });
-}
-scene.background = skyTexture();
-scene.fog = new THREE.Fog(0xcad8e4, 400, 4000); // haze: about a quarter on the mountains round the world's edge
+// The sky: scattered sunlight (Preetham's model) from the sun's direction, centered on whichever camera
+// is drawing. The fog is its color at the horizon, so the far mountains fade into it. The aircraft
+// reflects it.
+const SUN = new THREE.Vector3(40, 90, 25).normalize(); // toward the sun from the ground: high in the south-east
+const sky = new Sky();
+sky.scale.setScalar(9000);
+for (const [name, value] of Object.entries({ turbidity: 3, rayleigh: 2, mieCoefficient: 0.004, mieDirectionalG: 0.8 })) sky.material.uniforms[name].value = value;
+sky.material.uniforms.sunPosition.value.copy(SUN);
+scene.add(sky);
+const skyDome = sky.clone();
+skyDome.scale.setScalar(50); // inside the reach of the camera that makes the environment map
+scene.environment = new THREE.PMREMGenerator(renderer).fromScene(new THREE.Scene().add(skyDome)).texture;
+scene.fog = new THREE.Fog(0xbccbd9, 400, 4000); // haze: about a quarter on the mountains round the world's edge
 const camera = new THREE.PerspectiveCamera(55, innerWidth / innerHeight, 0.05, 8000);
-scene.add(new THREE.HemisphereLight(0xe3f0ff, 0x4d5b3a, 1.3));
-const sun = new THREE.DirectionalLight(0xffffff, 2.4);
+scene.add(new THREE.HemisphereLight(0xe3f0ff, 0x4d5b3a, 2)); // more light, for the low exposure
+const sun = new THREE.DirectionalLight(0xffffff, 3.6);
 sun.castShadow = true;
 sun.shadow.mapSize.set(2048, 2048);
 sun.shadow.normalBias = 0.02;
 Object.assign(sun.shadow.camera, { left: -4, right: 4, top: 4, bottom: -4, near: 1, far: 300 });
 scene.add(sun, sun.target);
 addEventListener("resize", () => renderer.setSize(innerWidth, innerHeight));
+
+// What the thermal camera sees (drawThermal below): each surface's material swapped for its warmth,
+// a shade of gray: lit, so sunny ground reads warmer than shade, or glowing, for bodies and water, whose
+// warmth the sun doesn't set. No haze: it hardly dims heat over a few hundred metres.
+const warmth = (level, options) => new THREE.MeshLambertMaterial({ color: new THREE.Color(level, level, level), fog: false, ...options });
+const glow = (level) => new THREE.MeshBasicMaterial({ color: new THREE.Color(level, level, level), fog: false });
+const feel = (object, material) => object.traverse((o) => o.isMesh && (o.userData.heat = material));
 
 // Ground grain: tiling noise around a mean of 0.5, in blobs from a sixteenth of the tile down to single
 // texels. Mipmapped, so it blends to its mean (no change) wherever it is finer than a screen pixel.
@@ -164,6 +175,7 @@ function groundMesh() {
   material.onBeforeCompile = addGrain;
   const mesh = new THREE.Mesh(geometry, material);
   mesh.receiveShadow = true;
+  feel(mesh, warmth(0.22, { onBeforeCompile: addGrain }));
   scene.add(mesh);
   return geometry;
 }
@@ -173,6 +185,7 @@ function lake() {
   const material = new THREE.MeshPhongMaterial({ color: 0x2f5a70, specular: 0x9ab8c8, shininess: 80, transparent: true, opacity: 0.9 });
   const mesh = new THREE.Mesh(new THREE.CircleGeometry(land.lake.radius, 96).rotateX(-Math.PI / 2), material);
   mesh.position.copy(world([...land.lake.center, -land.water]));
+  feel(mesh, glow(0.06)); // cold
   scene.add(mesh);
 }
 
@@ -200,14 +213,48 @@ function trail() {
   material.onBeforeCompile = addGrain;
   const mesh = new THREE.Mesh(geometry, material);
   mesh.receiveShadow = true;
+  feel(mesh, warmth(0.3, { onBeforeCompile: addGrain, side: THREE.DoubleSide })); // bare dirt warms in the sun
   scene.add(mesh);
 }
 
-// The forest: each tree a cone of needles on a trunk, sunk 30 cm so slopes don't show under it.
+// A conifer's crown, unit height: three tiers of needles, widest at the bottom, their rims ragged
+// (the same jitter for every tree, by the angle round the trunk, so the cones' seams stay closed).
+// Open underneath: the cameras are always above the trees.
+function conifer() {
+  const random = seeded(7);
+  const tiers = [[1, 0, 0.5], [0.74, 0.3, 0.42], [0.48, 0.55, 0.45]].map(([radius, base, height]) => {
+    const jitter = Array.from({ length: 7 }, () => 0.82 + 0.36 * random());
+    const tier = new THREE.ConeGeometry(radius, height, 7, 1, true).translate(0, base + height / 2, 0);
+    const p = tier.attributes.position;
+    for (let k = 0; k < p.count; k++) {
+      const side = jitter[Math.round((Math.atan2(p.getZ(k), p.getX(k)) / (2 * Math.PI)) * 7 + 7) % 7];
+      p.setXYZ(k, p.getX(k) * side, p.getY(k), p.getZ(k) * side);
+    }
+    return tier;
+  });
+  return mergeGeometries(tiers);
+}
+
+// The treetops' sway: each crown leans with the wind, more toward its top, in its own phase
+const wind = { value: 0 }; // s
+function swaying(material) {
+  material.onBeforeCompile = (shader) => {
+    shader.uniforms.wind = wind;
+    shader.vertexShader = shader.vertexShader.replace("#include <common>", "#include <common>\nuniform float wind;").replace(
+      "#include <begin_vertex>",
+      `#include <begin_vertex>
+      float phase = instanceMatrix[3].x * 0.07 + instanceMatrix[3].z * 0.05;
+      transformed.xz += 0.05 * transformed.y * transformed.y * vec2(sin(1.3 * wind + phase), cos(1.1 * wind + phase));`,
+    );
+  };
+  return material;
+}
+
+// The forest: each tree a tiered conifer on a trunk, sunk 30 cm so slopes don't show under it.
 // Drawing only, like the rocks.
 function trees() {
   const count = land.trees.length / 3;
-  const crowns = new THREE.InstancedMesh(new THREE.ConeGeometry(1, 1, 7).translate(0, 0.5, 0), new THREE.MeshLambertMaterial({ flatShading: true }), count);
+  const crowns = new THREE.InstancedMesh(conifer(), swaying(new THREE.MeshLambertMaterial({ flatShading: true })), count);
   const trunks = new THREE.InstancedMesh(new THREE.CylinderGeometry(1, 1, 1, 5).translate(0, 0.5, 0), new THREE.MeshLambertMaterial({ color: 0x4a3a2b }), count);
   const random = seeded(3);
   const [matrix, turn, color] = [new THREE.Matrix4(), new THREE.Quaternion(), new THREE.Color()];
@@ -217,8 +264,10 @@ function trees() {
     turn.setFromAxisAngle(new THREE.Vector3(0, 1, 0), 2 * Math.PI * random());
     crowns.setMatrixAt(i, matrix.compose(base.clone().setY(base.y + 0.2 * height), turn, new THREE.Vector3(0.22 * height, 0.85 * height, 0.22 * height)));
     trunks.setMatrixAt(i, matrix.compose(base, turn, new THREE.Vector3(0.025 * height, 0.3 * height, 0.025 * height)));
-    crowns.setColorAt(i, color.setHSL(0.26 + 0.07 * random(), 0.3 + 0.2 * random(), 0.12 + 0.08 * random(), THREE.SRGBColorSpace));
+    crowns.setColorAt(i, color.setHSL(0.26 + 0.07 * random(), 0.35 + 0.2 * random(), 0.18 + 0.1 * random(), THREE.SRGBColorSpace));
   }
+  feel(crowns, warmth(3.4)); // times their dark colors: about the ground's, cooler in their own shade
+  feel(trunks, warmth(0.2));
   scene.add(crowns, trunks);
 }
 
@@ -249,41 +298,71 @@ function rocks(count) {
     i++;
   }
   mesh.receiveShadow = true;
+  feel(mesh, warmth(4)); // sun-warmed
   scene.add(mesh);
 }
 
-// An animal from boxes and cylinders, facing +z with its feet at 0, about its WILDLIFE size: elk
-// with antlers, deer at two thirds of an elk, a bulky bear; or a boulder for a sun-warmed rock
+// An animal, facing +z with its feet at 0, about its WILDLIFE size, from rounded parts: a body on four
+// legs that swing from the hip (`userData.legs`: front left, front right, hind left, hind right), a neck
+// and head; elk with antlers and a pale rump, deer at two thirds of an elk, a bulky bear with a
+// shoulder hump; or a boulder for a sun-warmed rock. `userData.stride`: the ground a cycle of its legs covers (m).
 function beast(kind) {
   const group = new THREE.Group();
-  const part = (geometry, color, [x, y, z], [tilt, splay] = [0, 0]) => {
+  const add = (geometry, color, [x, y, z], [tilt, splay] = [0, 0], parent = group) => {
     const mesh = new THREE.Mesh(geometry, new THREE.MeshLambertMaterial({ color, flatShading: kind === "rock" }));
     mesh.position.set(x, y, z);
-    mesh.rotation.set(tilt, 0, splay);
-    group.add(mesh);
+    mesh.rotation.set(tilt, 0, splay); // tilt leans its top forward, splay to its right
+    parent.add(mesh);
   };
-  const box = (w, h, l) => new THREE.BoxGeometry(w, h, l);
-  const leg = (r, h) => new THREE.CylinderGeometry(r, 0.8 * r, h, 6);
+  const capsule = (radius, length) => new THREE.CapsuleGeometry(radius, length, 3, 8); // upright; the length is between the caps
+  const lying = (radius, length) => capsule(radius, length).rotateX(Math.PI / 2); // along z
   if (kind === "rock") {
-    part(new THREE.IcosahedronGeometry(1, 0).scale(0.7, 0.45, 0.6), 0x7d756a, [0, 0.2, 0]);
-  } else if (kind === "bear") {
-    for (const [x, z] of [[-0.25, 0.45], [0.25, 0.45], [-0.25, -0.45], [0.25, -0.45]]) part(leg(0.11, 0.5), 0x2e2620, [x, 0.25, z]);
-    part(box(0.75, 0.7, 1.3), 0x2e2620, [0, 0.82, 0]);
-    part(box(0.42, 0.38, 0.45), 0x2e2620, [0, 0.95, 0.8]);
-    part(box(0.2, 0.16, 0.18), 0x5a4a3a, [0, 0.88, 1.08]); // snout
-  } else {
-    const s = kind === "elk" ? 1 : 0.66;
-    const [coat, dark] = kind === "elk" ? [0x8b6643, 0x4f3a28] : [0xa57b50, 0x6b4e33];
-    for (const [x, z] of [[-0.22, 0.7], [0.22, 0.7], [-0.22, -0.7], [0.22, -0.7]]) part(leg(0.06 * s, 0.85 * s), dark, [x * s, 0.425 * s, z * s]);
-    part(box(0.55 * s, 0.65 * s, 1.75 * s), coat, [0, 1.15 * s, 0]);
-    part(box(0.28 * s, 0.7 * s, 0.32 * s), dark, [0, 1.5 * s, 0.85 * s], [-0.5, 0]); // neck
-    part(box(0.24 * s, 0.28 * s, 0.55 * s), coat, [0, 1.85 * s, 1.1 * s]); // head
-    if (kind === "elk") for (const side of [-1, 1]) part(leg(0.025, 0.9), 0xd8c8a0, [0.15 * side, 2.3, 0.95], [-0.35, -0.5 * side]); // antlers
+    add(new THREE.IcosahedronGeometry(1, 0).scale(0.7, 0.45, 0.6), 0x7d756a, [0, 0.2, 0]);
+    return group;
+  }
+  const bear = kind === "bear";
+  const s = kind === "deer" ? 0.66 : 1;
+  const [coat, dark] = { elk: [0x8b6643, 0x4f3a28], deer: [0xa57b50, 0x6b4e33], bear: [0x2e2620, 0x231c17] }[kind];
+  const [hip, legRadius, across, along] = bear ? [0.62, 0.11, 0.2, 0.42] : [1.0 * s, 0.06 * s, 0.17 * s, 0.6 * s]; // the legs' hips: height, and half-spacing across and along
+  const legs = [[1, 1], [-1, 1], [1, -1], [-1, -1]].map(([left, front]) => {
+    const pivot = new THREE.Group();
+    pivot.position.set(left * across, hip, front * along);
+    add(capsule(legRadius, hip - 2 * legRadius), dark, [0, -hip / 2, 0], [0, 0], pivot);
+    group.add(pivot);
+    return pivot;
+  });
+  Object.assign(group.userData, { legs, stride: 0.7 * WILDLIFE[kind].size[0], walked: 0, pace: 0 });
+  if (bear) {
+    add(lying(0.36, 0.65), coat, [0, 0.72, -0.05]); // body
+    add(new THREE.SphereGeometry(0.24, 12, 8), coat, [0, 0.92, 0.3]); // shoulder hump
+    add(new THREE.SphereGeometry(0.2, 12, 8), coat, [0, 0.82, 0.78]); // head
+    add(lying(0.085, 0.12), 0x5a4a3a, [0, 0.76, 0.98]); // snout
+    for (const side of [-1, 1]) add(new THREE.SphereGeometry(0.055, 8, 6), coat, [0.13 * side, 0.99, 0.74]); // ears
+    return group;
+  }
+  add(lying(0.3 * s, 1.2 * s), coat, [0, 1.17 * s, 0]); // body
+  add(capsule(0.12 * s, 0.45 * s), dark, [0, 1.5 * s, 0.88 * s], [0.6, 0]); // neck, leaning forward
+  add(lying(0.11 * s, 0.32 * s), coat, [0, 1.8 * s, 1.1 * s], [0.25, 0]); // head, nose down
+  if (kind !== "elk") return group;
+  add(new THREE.SphereGeometry(0.22, 12, 8).scale(1, 1, 0.45), 0xc9b08a, [0, 1.2, -0.86]); // pale rump
+  // Antlers: a beam each side sweeping up, back and out from the top of the head, with two tines forward.
+  // `prong` lays a rod `length` long from `from`, leaning by `tilt` and `splay`, and returns its direction.
+  const prong = (from, length, radius, tilt, splay) => {
+    const way = new THREE.Vector3(0, 1, 0).applyEuler(new THREE.Euler(tilt, 0, splay));
+    add(capsule(radius, length), 0xd8c8a0, from.clone().addScaledVector(way, length / 2).toArray(), [tilt, splay]);
+    return way;
+  };
+  for (const left of [1, -1]) {
+    const base = new THREE.Vector3(0.07 * left, 1.9, 1.02);
+    const beam = prong(base, 0.75, 0.025, -0.5, -0.5 * left);
+    for (const f of [0.35, 0.7]) prong(base.clone().addScaledVector(beam, 0.75 * f), 0.25, 0.018, 0.5, -0.25 * left);
   }
   return group;
 }
 const beasts = land.wildlifeAt(0).map((animal) => {
   const group = beast(animal.kind);
+  group.position.copy(world([...animal.position, -land.terrain(...animal.position)]));
+  feel(group, glow(animal.kind === "rock" ? 0.7 : 1)); // a warm rock half as bright against the ground as an animal
   scene.add(group);
   return group;
 });
@@ -299,6 +378,7 @@ const corners = pad.attributes.position;
 for (let i = 0; i < corners.count; i++) corners.setY(i, model.ground(-corners.getZ(i), corners.getX(i)) + 0.03);
 const padMesh = new THREE.Mesh(pad, new THREE.MeshLambertMaterial({ color: 0x3b3b3e }));
 padMesh.receiveShadow = true;
+feel(padMesh, warmth(0.4));
 scene.add(padMesh);
 
 // You: a hiker who sets off up the trail when the aircraft takes off. Circling follows your phone's fixes.
@@ -323,6 +403,7 @@ for (const [geometry, color, y, z] of [
   mesh.castShadow = true;
   hiker.add(mesh);
 }
+feel(hiker, glow(0.9));
 scene.add(hiker);
 // Stand him where he is, facing up the trail, legs swinging a stride (1.5 m) per cycle while he walks
 function placeHiker() {
@@ -383,8 +464,8 @@ let notice = { text: "", until: 0 };
 const tell = (text, seconds) => (notice = { text, until: performance.now() + 1000 * seconds });
 
 // The cameras (sensors.js): a look each second of sim time once airborne, the turret panned toward
-// the trail LOOK_AHEAD m past you while circling, else ahead of the aircraft. The color camera's
-// view is drawn too, from the aircraft, with the airframe hidden.
+// the trail LOOK_AHEAD m past you while circling, else ahead of the aircraft. The panel draws the
+// color or the thermal camera's view, from the aircraft, with the airframe hidden.
 const cams = cameras(ac);
 const droneCamera = new THREE.PerspectiveCamera(degrees(cams.color.v), 16 / 9, 0.05, 8000);
 function aimDroneCamera() {
@@ -398,8 +479,10 @@ let looked = -1; // the last look (s)
 function lookAround() {
   if (controller.mode === "landed" || Math.floor(state.time) <= looked) return;
   looked = Math.floor(state.time);
+  const { reports, bears } = survey(cams, land, state, controller.orbit, you.walked, { sightings, coverage, rolls });
+  // What each camera saw, boxed on its view for 1.5 s
+  for (const report of reports) if (report.index !== "lake") boxes.set(`${report.camera} ${report.index}`, { ...report, until: state.time + 1.5 });
   // A bear named near the trail ahead of you: say so once; the map keeps it
-  const { bears } = survey(cams, land, state, controller.orbit, you.walked, { sightings, coverage, rolls });
   for (const [key, off] of bears) {
     if (!warned.has(key)) tell(`Bear spotted ${Math.round(off)} m from the trail ahead`, 6);
     warned.add(key);
@@ -513,7 +596,152 @@ function drawInto(box, eye) {
   renderer.setScissor(left, innerHeight - bottom, width, height);
   eye.aspect = width / height;
   eye.updateProjectionMatrix();
+  sky.position.copy(eye.position);
   renderer.render(scene, eye);
+}
+
+// The thermal camera: the turret's view at the Lepton's 160 x 120 (4:3), drawn into a target
+// (multisampled, as a sensor's pixel averages what falls on it), then shown pixel for pixel, centered
+// in the panel's box, in the ironbow palette: cold black through purple, red and orange to hot white
+const THERMAL = [ac.cameras.thermal.pixels, (3 * ac.cameras.thermal.pixels) / 4];
+const thermalCamera = new THREE.PerspectiveCamera(degrees(cams.thermal.v), THERMAL[0] / THERMAL[1], 0.05, 8000);
+const thermalTarget = new THREE.WebGLRenderTarget(...THERMAL, { samples: 4, minFilter: THREE.NearestFilter, magFilter: THREE.NearestFilter });
+const ironbow = new THREE.Mesh(
+  new THREE.PlaneGeometry(2, 2),
+  new THREE.ShaderMaterial({
+    uniforms: { image: { value: thermalTarget.texture } },
+    vertexShader: "varying vec2 vUv; void main() { vUv = uv; gl_Position = vec4(position.xy, 0.0, 1.0); }",
+    fragmentShader: `uniform sampler2D image;
+      varying vec2 vUv;
+      void main() {
+        float t = 4.0 * clamp(dot(texture2D(image, vUv).rgb, vec3(0.2126, 0.7152, 0.0722)), 0.0, 1.0);
+        vec3 c = mix(vec3(0.0, 0.0, 0.05), vec3(0.3, 0.0, 0.5), clamp(t, 0.0, 1.0));
+        c = mix(c, vec3(0.85, 0.15, 0.3), clamp(t - 1.0, 0.0, 1.0));
+        c = mix(c, vec3(1.0, 0.6, 0.0), clamp(t - 2.0, 0.0, 1.0));
+        gl_FragColor = vec4(mix(c, vec3(1.0, 1.0, 0.8), clamp(t - 3.0, 0.0, 1.0)), 1.0);
+      }`,
+    depthTest: false,
+    depthWrite: false,
+  }),
+);
+ironbow.frustumCulled = false; // already in clip space
+const flat = new THREE.OrthographicCamera();
+let thermal = false; // which camera the panel shows; its button swaps them
+const cameraLabel = document.querySelector("#feed span");
+document.querySelector("#feed button").addEventListener("click", (event) => {
+  thermal = !thermal;
+  event.target.textContent = thermal ? "Color" : "Thermal";
+  cameraLabel.textContent = thermal ? `Thermal camera, ${THERMAL.join(" × ")}` : "Color camera";
+});
+// The part of the panel's box (px from its top left) the shown camera's view fills
+function shownView() {
+  const { width, height } = cameraBox.getBoundingClientRect();
+  const across = thermal ? (height * THERMAL[0]) / THERMAL[1] : width;
+  return [(width - across) / 2, 0, across, height];
+}
+function drawThermal() {
+  thermalCamera.position.copy(droneCamera.position);
+  thermalCamera.quaternion.copy(droneCamera.quaternion);
+  const swap = () => scene.traverse((o) => o.userData.heat && ([o.material, o.userData.heat] = [o.userData.heat, o.material]));
+  swap();
+  renderer.setRenderTarget(thermalTarget);
+  renderer.render(scene, thermalCamera);
+  renderer.setRenderTarget(null);
+  swap();
+  const { left, bottom } = cameraBox.getBoundingClientRect();
+  const [x, , across, height] = shownView();
+  renderer.setViewport(left + x, innerHeight - bottom, across, height);
+  renderer.setScissor(left + x, innerHeight - bottom, across, height);
+  renderer.render(ironbow, flat);
+}
+
+// Over the shown view: detection boxes, for what its camera reported in the last 1.5 s (sensors.js),
+// boxed round the target where it is now, labelled with what the camera made of it and how far it was,
+// in the map's pin colors; and you
+const boxes = new Map(); // "camera index" → the report, and until when (s) it shows
+const boxCanvas = cameraBox.querySelector("canvas");
+const boxPen = boxCanvas.getContext("2d");
+const corner = new THREE.Vector3();
+function drawOverlay() {
+  const { width, height } = cameraBox.getBoundingClientRect();
+  const [pixelsAcross, pixelsDown] = [Math.round(width * devicePixelRatio), Math.round(height * devicePixelRatio)];
+  if (boxCanvas.width !== pixelsAcross || boxCanvas.height !== pixelsDown) Object.assign(boxCanvas, { width: pixelsAcross, height: pixelsDown });
+  boxPen.setTransform(devicePixelRatio, 0, 0, devicePixelRatio, 0, 0);
+  boxPen.clearRect(0, 0, width, height);
+  const [x, y, w, h] = shownView();
+  const [eye, name] = thermal ? [thermalCamera, "thermal"] : [droneCamera, "color"];
+  Object.assign(boxPen, { lineWidth: 1.5, font: "600 10px system-ui, sans-serif", textBaseline: "bottom" });
+  boxPen.save();
+  boxPen.beginPath();
+  boxPen.rect(x, y, w, h);
+  boxPen.clip(); // inside the view
+  const labels = []; // [text, color, left, top, width], drawn over all the boxes; a herd's boxes share the first one's
+  for (const [key, report] of boxes) {
+    if (report.until < state.time) {
+      boxes.delete(key);
+      continue;
+    }
+    if (report.camera !== name) continue;
+    const bounds = new THREE.Box3().setFromObject(beasts[report.index]);
+    if (bounds.getCenter(corner).project(eye).z > 1 || Math.abs(corner.x) > 1 || Math.abs(corner.y) > 1) continue; // out of view
+    let [left, top, right, bottom] = [Infinity, Infinity, -Infinity, -Infinity];
+    for (let k = 0; k < 8; k++) {
+      corner.set(k & 1 ? bounds.max.x : bounds.min.x, k & 2 ? bounds.max.y : bounds.min.y, k & 4 ? bounds.max.z : bounds.min.z).project(eye);
+      const [px, py] = [x + ((corner.x + 1) / 2) * w, y + ((1 - corner.y) / 2) * h];
+      [left, top, right, bottom] = [Math.min(left, px), Math.min(top, py), Math.max(right, px), Math.max(bottom, py)];
+    }
+    const [cx, cy, halfW, halfH] = [(left + right) / 2, (top + bottom) / 2, Math.max(6, (right - left) / 2 + 2), Math.max(6, (bottom - top) / 2 + 2)]; // 12 px at least
+    const color = PINS[report.label][1];
+    const text = `${report.label} ${Math.round(report.range)} m`;
+    const across = boxPen.measureText(text).width + 6;
+    // The label: above the box, or below it at the view's top; pulled in from the view's right
+    const [labelLeft, labelTop] = [Math.min(cx - halfW - 0.75, x + w - across), cy - halfH - 13 > y ? cy - halfH - 13 : cy + halfH];
+    boxPen.strokeStyle = color;
+    boxPen.strokeRect(cx - halfW, cy - halfH, 2 * halfW, 2 * halfH);
+    const overlaps = ([, , otherLeft, otherTop, otherWidth]) => labelLeft < otherLeft + otherWidth && labelLeft + across > otherLeft && Math.abs(labelTop - otherTop) < 13;
+    if (!labels.some(overlaps)) labels.push([text, color, labelLeft, labelTop, across]);
+  }
+  for (const [text, color, left, top, width] of labels) {
+    boxPen.fillStyle = color;
+    boxPen.fillRect(left, top, width, 13);
+    boxPen.fillStyle = "#111";
+    boxPen.fillText(text, left + 3, top + 11.5);
+  }
+  // You: a white ring where you are in the view, or out of it, an arrow at its edge pointing your way
+  // (by your left-right and up-down from the camera's axis, which hold behind the camera too)
+  const you = hiker.position.clone().setY(hiker.position.y + 0.9).applyMatrix4(eye.matrixWorldInverse); // x right, y up, -z ahead
+  const seen = you.clone().applyMatrix4(eye.projectionMatrix);
+  const inView = you.z < 0 && Math.abs(seen.x) < 1 && Math.abs(seen.y) < 1;
+  const way = new THREE.Vector2(you.x, -you.y).normalize(); // on the screen, y down
+  const reach = Math.min((w / 2 - 10) / Math.abs(way.x), (h / 2 - 10) / Math.abs(way.y));
+  const [px, py] = inView ? [x + ((seen.x + 1) / 2) * w, y + ((1 - seen.y) / 2) * h] : [x + w / 2 + reach * way.x, y + h / 2 + reach * way.y];
+  Object.assign(boxPen, { strokeStyle: "#1a1a1a", fillStyle: "#ffffff", lineWidth: 1.5 });
+  boxPen.beginPath();
+  if (inView) {
+    boxPen.arc(px, py, 7, 0, 2 * Math.PI);
+    boxPen.lineWidth = 4;
+    boxPen.stroke();
+    boxPen.strokeStyle = "#ffffff";
+    boxPen.lineWidth = 2;
+    boxPen.stroke();
+  } else {
+    const [ax, ay] = [-way.y, way.x]; // across the arrow
+    boxPen.moveTo(px + 7 * way.x, py + 7 * way.y);
+    boxPen.lineTo(px - 5 * way.x + 6 * ax, py - 5 * way.y + 6 * ay);
+    boxPen.lineTo(px - 5 * way.x - 6 * ax, py - 5 * way.y - 6 * ay);
+    boxPen.closePath();
+    boxPen.fill();
+    boxPen.stroke();
+  }
+  // Its label: above the ring, or inward of the arrow, inside the view
+  const across = boxPen.measureText("you").width + 6;
+  const [labelX, labelY] = inView ? [px, py - 18] : [px - 20 * way.x, py - 20 * way.y];
+  const [left, top] = [clamp(labelX - across / 2, x + 2, x + w - across - 2), clamp(labelY - 6.5, y + 2, y + h - 15)];
+  boxPen.fillStyle = "#ffffff";
+  boxPen.fillRect(left, top, across, 13);
+  boxPen.fillStyle = "#111";
+  boxPen.fillText("you", left + 3, top + 11.5);
+  boxPen.restore();
 }
 
 function draw(dt) {
@@ -530,14 +758,25 @@ function draw(dt) {
   const [, , yaw] = euler(state.q);
   cameraYaw += wrap(yaw - cameraYaw) * (1 - Math.exp(-3 * dt));
   placeHiker();
+  wind.value = state.time;
   land.wildlifeAt(state.time).forEach((animal, i) => {
-    beasts[i].position.copy(world([...animal.position, -land.terrain(...animal.position)]));
-    beasts[i].rotation.y = Math.PI - animal.heading; // the models face +z, the scene's south
+    const body = beasts[i];
+    const at = world([...animal.position, -land.terrain(...animal.position)]);
+    const step = body.position.distanceTo(at); // m since the last frame
+    body.position.copy(at);
+    body.rotation.y = Math.PI - animal.heading; // the models face +z, the scene's south
+    // Its legs swing 0.4 rad a stride per cycle in a four-beat walk (hind, fore, other hind, other fore),
+    // as far as it is walking (full from 0.3 m/s), easing in and out over about a quarter second
+    const { legs, stride } = body.userData;
+    if (!legs) return;
+    body.userData.walked += step;
+    body.userData.pace += (Math.min(1, step / Math.max(dt, 0.001) / 0.3) - body.userData.pace) * (1 - Math.exp(-4 * dt));
+    legs.forEach((leg, k) => (leg.rotation.x = 0.4 * body.userData.pace * Math.sin(2 * Math.PI * (body.userData.walked / stride + [0.25, 0.75, 0, 0.5][k]))));
   });
   const behind = [state.p[0] - CHASE[0] * Math.cos(cameraYaw), state.p[1] - CHASE[0] * Math.sin(cameraYaw)];
   camera.position.copy(world([...behind, Math.min(state.p[2] - CHASE[1], -ground(behind) - 0.5)]));
   camera.lookAt(target);
-  sun.position.copy(target).add(new THREE.Vector3(40, 90, 25));
+  sun.position.copy(target).addScaledVector(SUN, 100);
   sun.target.position.copy(target);
   renderer.setScissorTest(false);
   renderer.setClearColor(0x16191d); // the panel's background, set each time: the shadow pass leaves white
@@ -546,14 +785,14 @@ function draw(dt) {
   drawInto(viewBox, camera);
   aimDroneCamera();
   aircraft.visible = false;
-  drawInto(cameraBox, droneCamera);
+  if (thermal) drawThermal();
+  else drawInto(cameraBox, droneCamera);
   aircraft.visible = true;
+  drawOverlay();
 }
 
-const modeLine = document.getElementById("mode");
 const readings = document.getElementById("readings");
 const message = document.getElementById("message");
-const MODES = { landed: "LANDED", hover: "HOVER", transition: "TRANSITION", plane: "PLANE", back: "BACK TRANSITION", crashed: "CRASHED" };
 function show(text, warning = false) {
   message.hidden = !text;
   message.textContent = text;
@@ -571,7 +810,6 @@ function updatePanel() {
     ["Air", ac.air],
     ["You", you.done ? "at the lake" : `walking at ${you.speed.toFixed(1)} m/s, ${Math.round(you.walked)} of ${land.trail.length} m`],
   ];
-  modeLine.textContent = `${MODES[controller.mode]}${controller.orbit ? " · CIRCLING YOU" : ""}`;
   readings.innerHTML = rows.map(([k, v]) => `<tr><td>${k}</td><td>${v}</td></tr>`).join("");
   if (state.crashed) show(`Crashed: ${state.crashed}`, true);
   else if (performance.now() < notice.until) show(notice.text);
@@ -602,5 +840,10 @@ function frame(now) {
   requestAnimationFrame(frame);
 }
 let mapDrawn = 0; // when the map was last drawn (ms); four times a second is enough
-show("");
+// A frame with each camera behind the spinner, so every shader compiles now, not at the first click on Thermal
+thermal = true;
+draw(0);
+thermal = false;
+draw(0);
+document.getElementById("loading").remove(); // ready: the spinner goes
 requestAnimationFrame(frame);

@@ -20,7 +20,7 @@ Trailhawk: a parametric CAD model of a small tri-tiltrotor VTOL drone, written w
 | `trailhawk/print_parts.py` | Printable airframe: hollowed, trimmed, channeled and pocketed printed parts cut into pieces that fit a 256 mm bed. Run it to write `out/print/*.stl` and display the pieces. |
 | `trailhawk/render.py`, `trailhawk/render_scene.py` | Exports every part with its paint color, then runs Blender headless to render `out/render/studio.png` and `aerial.png`. |
 | `trailhawk/sim.py` | The website's data and local server: the simulator's flight data (`aircraft(vtol)`), `--export` to rewrite `site/data/`, and a server for `site/`. |
-| `site/` | The website, all static files. `index.html` and `cad.js`: the model page. `favicon.svg`: the tab icon, a soaring hawk silhouette (public domain) in orange on the site's ink color. `trailhawk.jpg`: the studio render (`python -m trailhawk.render`), shown at the top of `README.md` and as the link preview (`og:image`). `aircraft.js`: the parts loader both pages share. `data/`: what `python -m trailhawk.sim --export` writes, committed. Vercel deploys it from `main` (project `trailhawk`, root directory `site`) to https://trailhawk.vercel.app; production is public, previews need a Vercel login. `sim/`: the flight simulator, where `physics.js` is the flight model, `control.js` the flight controller, `world.js` the generated world (ground, trail, lake, trees, wildlife, the walking hiker and his phone), `sensors.js` what the aircraft's cameras detect, and `app.js` and `index.html` the page: the chase view, the drone camera's view, the readings and the map. |
+| `site/` | The website, all static files. `index.html` and `cad.js`: the model page. `favicon.svg`: the tab icon, a soaring hawk silhouette (public domain) in orange on the site's ink color. `trailhawk.jpg`: the studio render (`python -m trailhawk.render`), shown at the top of `README.md` and as the link preview (`og:image`). The simulator video in `README.md` is a GitHub attachment, not a file here: 26 s of the page filmed frame by frame in headless Chrome (1600 × 900 at 2×, the page's clock stepped 1/30 s a frame so it plays smoothly), encoded as 1280 × 720 H.264 (6 MB), then dropped into a GitHub issue box for its link. `aircraft.js`: the parts loader both pages share. `data/`: what `python -m trailhawk.sim --export` writes, committed. Vercel deploys it from `main` (project `trailhawk`, root directory `site`) to https://trailhawk.vercel.app; production is public, previews need a Vercel login. `sim/`: the flight simulator, where `physics.js` is the flight model, `control.js` the flight controller, `world.js` the generated world (ground, trail, lake, trees, wildlife, the walking hiker and his phone), `sensors.js` what the aircraft's cameras detect, and `app.js` and `index.html` the page: the chase view, the drone's color or thermal camera view with detection boxes, the readings and the map. |
 | `tests/` | `unittest` checks: solid validity, key dimensions, pivots, prop and tilt clearance, component and spar fit, the flight timeline, balance limits and tail volumes, the propulsion model against the motor test, thrust, current and servo margins at altitude, the energy budget, that print pieces fit the bed, conserve material and clear the hardware, that every field section fits the pack, that every strength check has a positive margin, that the simulator matches the reports, flies a whole trip, handles slopes, valleys and ridges, generates repeatable worlds with a walkable trail, follows the walking hiker to the lake under the 400 ft ceiling, that its cameras detect what the model says and map the hike, and that the committed site data matches the model. `check.mjs` flies the simulator headless for `test_sim.py` (needs Node.js; skipped without it). |
 | `requirements.txt` | Python dependencies. |
 | `.claude/launch.json` | Launch configs for the Claude desktop app's browser pane: `ocp-viewer` (the standalone viewer) and `site` (`python -m trailhawk.sim --serve` on port 8123), both run with `.venv/bin/python` (macOS/Linux path). |
@@ -325,13 +325,15 @@ The multicopter mixer solves for the thrusts from each motor's full lift, roll a
 **The page (`app.js`, `index.html`):** no controls; it flies `missionInput` over a generated world (below), and `?seed=N` picks the world.
 - The chase view fills the left three quarters, centered on the aircraft from 4.5 m behind its heading and 1.5 m up (and at least 0.5 m above the ground).
 - The right quarter shows:
-  - the mode;
-  - the color camera's view: the turret's aim (`sensors.turret`) at the camera's 66° across, with the airframe hidden;
+  - at the top, a link back to the model page and two sentences on what the page shows;
+  - the camera's view, color (66° across) or thermal, over a bar that names it and holds the button swapping them: from the turret's aim (`sensors.turret`) with the airframe hidden, with what the cameras detect boxed;
   - the readings: airspeed, height above the ground, distance from the hiker, power, battery, the air, and the hiker's progress;
-  - the map (below), with what the cameras found under it, and a link back to the model page.
-- In portrait the chase view sits on top, and below it the camera and readings sit beside the map.
-- Both views are drawn on one canvas that fills the window, cleared to the panel's color, into the boxes of `#view` and `#camera` (viewport and scissor), at about 6 ms of script a frame.
-- A message over the chase view shows "Loading the model…" until the page is ready, and while they apply: a crash, STALL, the battery's 20% reserve and the bear warning (6 s).
+  - the map (below), with what the cameras found under it.
+- In portrait the chase view sits on top, and below it the camera and readings sit beside the map; the page scrolls when they don't fit (in landscape, the panel scrolls).
+- Both views are drawn on one canvas that fills the window, cleared to the panel's color, into the boxes of `#view` and `#camera` (viewport and scissor) wherever they are, so the views follow the page as it scrolls, at about 2–3 ms of script a frame with the color view and 4–5 ms with the thermal one (medians, headless Chrome at 1600 × 900).
+- **Thermal view:** the same scene with each mesh's material swapped for its warmth (`userData.heat`, set by `feel`), in gray. Lit, so sunny ground reads warmer than shade: the ground 0.22 (grained), the trail 0.3, crowns 3.4 times their dark colors, trunks 0.2, the pad 0.4, the pad's rocks 4 times their colors. Glowing: the hiker 0.9, animals 1, warm rocks 0.7 (half an animal's contrast against the ground, like `WARM_ROCK`), the lake 0.06 (cold). No fog. It is drawn at the Lepton's 160 × 120 into a 4× multisampled target (a pixel averages what falls on it), then shown pixel for pixel, 4:3 and centered in the camera's box, in the ironbow palette by brightness: black, purple, red, orange, pale yellow.
+- **Detection boxes:** each report from the shown camera in the last 1.5 s of sim time is boxed round the target's model where it is now (its bounds projected, at least 12 px), labelled with what the camera made of it and its range ("elk 144 m", "warm 191 m"), in the map's pin colors; where labels would overlap (a herd), only the first is drawn. They are drawn on a 2D canvas over the camera's box, with you: a white ring where you are in the view, or an arrow at its edge pointing your way, labelled "you".
+- A spinner covers the page until it is ready, while one frame is drawn with each camera behind it so every shader compiles before the page shows (the first switch to thermal used to stall it about a second). A message over the chase view shows while they apply: a crash, STALL, the battery's 20% reserve and the bear warning (6 s).
 
 **Tested (`test_sim.py` through `node tests/check.mjs`):**
 - The committed `site/data/aircraft.json` matches the model.
@@ -404,8 +406,9 @@ The multicopter mixer solves for the thrusts from each motor's full lift, roll a
     - three herds of 3–6 elk in the open 50–250 m from the trail;
     - up to five deer at the forest's edges 30–200 m from it;
     - a bear 40–120 m from it, past the first 40% of the trail;
-    - four warm rocks in the open 30–200 m from it.
-  - Each spot keeps the animal's wander clear of water and inside the mountains, on a slope under 0.4. A rule that finds no spot in 400 tries places nothing: over 100 random seeds there were 9–18 elk, 1–5 deer, 0–1 bear and 4 rocks.
+    - four warm rocks in the open 30–200 m from it;
+    - and a herd of 3–5 elk grazing near the trailhead, in the open 120–220 m along his walk and 40–120 m to one side of the trail, so the cameras find something in their first sweeps (in world 1 they name one in 15 of the first 20 looks).
+  - Each spot keeps the animal's wander clear of water and inside the mountains, on a slope under 0.4. A rule that finds no spot in 400 tries places nothing: over worlds 1–100 there were 12–22 elk, 0–5 deer, 0–1 bear and 3–4 rocks, and the trailhead herd found a spot in 90.
   - Each animal wanders round its spot smoothly: elk up to 30 m (a herd together, each 4 m of its own), deer 20 m and the bear 40 m, at about 0.4 m/s, pausing now and then. Rocks stay put.
   - `along(metres)` gives the trail's point that far along his walk.
 
@@ -420,13 +423,13 @@ The multicopter mixer solves for the thrusts from each motor's full lift, roll a
 - **Grain:** keeps the ground sharp up close. `addGrain` multiplies the color by a generated, tiling noise texture (mean 0.5, ±16% typical) sampled in world position at four tile sizes: 0.8, 3.5, 15 and 70 m, each turned so the repeats don't line up. Mipmapping blends each size to its mean, no change, where it is finer than a screen pixel.
 - **Trail:** a strip of dirt 1.4 m wide, with its points every metre laid 6 cm above `ground()`. It is lifted rather than depth-offset: the logarithmic depth buffer writes depth from the shader, so `polygonOffset` would do nothing.
 - **Lake:** a slightly see-through Phong disc at the water's level.
-- **Trees:** one instanced mesh of 7-sided cones (crowns from 20% of the height, 22% as wide as the tree is tall) and one of trunks, sunk 30 cm so slopes don't show under them.
+- **Trees:** one instanced mesh of crowns and one of trunks, sunk 30 cm so slopes don't show under them. A crown (`conifer`) is three 7-sided cones stacked as tiers, widest at the bottom, with ragged rims (the same jitter on every tree, by angle, so the seams stay closed), open underneath since the cameras are always above the trees. It starts at 20% of the tree's height and is 22% as wide as the tree is tall, each in its own dark green. The crowns sway (`swaying`): each leans with the wind, more toward its top (about 1% of its height there), every 5–6 s in its own phase.
 - **Rocks:** 1,500 seeded rocks (one instanced mesh of lumpy icosahedra, mostly pebbles, a few up to about 1.4 m across, two-thirds buried) lie within 40 m of the pad. They stay at least 4 m from its center and 1.5 m from the trail.
-- **Animals:** boxes and cylinders: elk with antlers, deer at two thirds of an elk, a bulky dark bear, and a boulder for each warm rock. Each faces the way it's wandering.
+- **Animals:** rounded parts (capsules and spheres) about their `WILDLIFE` size: elk with antlers (a beam and two tines a side) and a pale rump, deer at two thirds of an elk, a bulky dark bear with a shoulder hump, and a boulder for each warm rock. Each faces the way it's wandering. Its legs swing from the hip in a four-beat walk (hind, fore, other hind, other fore): 0.4 rad, a stride of 0.7 times its length per cycle, as far as it is walking (full from 0.3 m/s).
 - Trees, rocks and animals are drawing only: the physics doesn't see them, and the aircraft flies through them.
 - **Pad:** a disc of rings every 25 cm, each point laid 3 cm above `ground()`.
 - **Hiker:** his legs swing a stride (1.5 m) per cycle as he walks.
-- **Sky:** the scene's background is a gradient from blue overhead to haze at the horizon. The fog, from 0.4 to 4 km, is that haze, so the far mountains fade into it.
+- **Sky and light:** three.js's `Sky` (Preetham's scattering model; turbidity 3, Rayleigh 2) with the sun high in the south-east (`SUN`, 62° up), centered on whichever camera is drawing. The aircraft's standard materials reflect it, through an environment map made from a small copy. ACES filmic tone mapping at exposure 0.5, with the hemisphere (2) and sun (3.6) lights raised to match. The fog, from 0.4 to 4 km, is the horizon's haze, so the far mountains fade into it.
 - The page uses a logarithmic depth buffer and an 8 km far plane.
 
 ## Cameras (`site/sim/sensors.js`)
@@ -436,7 +439,7 @@ A model of what the aircraft's cameras make of the world, not image processing: 
 **The cameras (`aircraft.json`, from `parts.py`):**
 - FLIR Lepton 3.5 thermal camera: 160 × 120 pixels across 57°.
 - Raspberry Pi Camera Module 3: 66° across. A detector reads its frames at 1920 × 1080 (`DETECTOR`; the camera takes 4608 × 2592).
-- The turret only pans, so the cameras look 45° down (`TILT`). While circling, it pans toward the trail 150 m past the hiker (`LOOK_AHEAD`), sweeping ±45° either side of it (`SWEEP`) and back every 12 s (`SWEEP_SECONDS`), so its looks cover a wide strip ahead of him (held still on the trail, the cameras named under half as many animals); otherwise, the way the aircraft is heading (`turret`, which the page also draws the color camera's view from).
+- The turret only pans, so the cameras look 45° down (`TILT`). While circling, it pans toward the trail 150 m past the hiker (`LOOK_AHEAD`), sweeping ±45° either side of it (`SWEEP`) and back every 12 s (`SWEEP_SECONDS`), so its looks cover a wide strip ahead of him (held still on the trail, the cameras named under half as many animals); otherwise, the way the aircraft is heading (`turret`, which the page also draws the cameras' views from).
 
 **A look (`look`), once a second of sim time once airborne,** through `survey`, which the page and `check.mjs` both run:
 - **In view:** each animal or rock is checked against each camera's view, then for a line of sight. The ground is sampled every 10 m between them, short of the last 3 m.
@@ -446,7 +449,7 @@ A model of what the aircraft's cameras make of the world, not image processing: 
   - The color camera recognizes at N50 = 4 cycles, naming it: elk, deer, bear or rock.
   - Under trees the odds fall by 70% (thermal) or 90% (color) times the forest's density there (`CANOPY`).
   - From 100 m up and 75 m out, an elk spans 2.5 thermal pixels (thermal detection about 0.67 a look) and 25 color ones. Thermal detection falls to even odds at about 150 m; color recognition at about 400 m.
-- **Report:** each report puts the target where the camera saw it, off by 1 m plus 1% of the range. The lake counts as mapped once its center is in the color camera's view within 600 m.
+- **Report:** each report puts the target where the camera saw it, off by 1 m plus 1% of the range, and gives the range (`survey` returns the look's reports, for the page's detection boxes). The lake counts as mapped once its center is in the color camera's view within 600 m.
 
 **Sightings (`record`):** a pin per target, labelled warm until the color camera names it, at its latest reported place. Tracking is perfect: each animal keeps its own pin, where a real tracker would match reports by place. A rock the thermal camera flagged and the color camera named is a false alarm ruled out.
 

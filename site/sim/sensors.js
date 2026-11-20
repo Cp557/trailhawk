@@ -80,8 +80,9 @@ export function sees(cams, land, view, animal) {
 
 // One look: what each camera detects of the wildlife it can see. The thermal camera finds warm
 // shapes (detection); the color camera names them (recognition): elk, deer, bear or rock. Each
-// report puts the target where the camera saw it, off by 1 m plus 1% of the range. Under trees the
-// odds fall by CANOPY times the forest's density there. `next` is the random stream.
+// report puts the target where the camera saw it, off by 1 m plus 1% of the range, and gives the
+// range. Under trees the odds fall by CANOPY times the forest's density there. `next` is the random
+// stream.
 export function look(cams, land, view, wildlife, next) {
   const reports = [];
   wildlife.forEach((animal, index) => {
@@ -96,7 +97,7 @@ export function look(cams, land, view, wildlife, next) {
           : odds(cycles, CYCLES.recognize) * (1 - CANOPY.color * cover);
       if (next() >= chance) continue;
       const error = 1 + 0.01 * range;
-      reports.push({ index, camera: name, label: name === "thermal" ? "warm" : animal.kind, position: [animal.position[0] + error * gaussian(next), animal.position[1] + error * gaussian(next)] });
+      reports.push({ index, camera: name, label: name === "thermal" ? "warm" : animal.kind, range, position: [animal.position[0] + error * gaussian(next), animal.position[1] + error * gaussian(next)] });
     }
   });
   const lake = [...land.lake.center, -land.water];
@@ -174,12 +175,14 @@ export const turret = (land, state, circling, walked) =>
 
 // The look a second that the page takes and the checks repeat: the turret's view; the reports
 // pinned in `sightings` and the ground marked in `coverage`, with the dice from `rolls`. Returns the
-// view, the wildlife as it stood, and the bears named near the trail ahead of the hiker.
+// view, the wildlife as it stood, the look's reports, and the bears named near the trail ahead of
+// the hiker.
 export function survey(cams, land, state, circling, walked, { sightings, coverage, rolls }) {
   const view = turret(land, state, circling, walked);
   const wildlife = land.wildlifeAt(state.time);
-  record(sightings, look(cams, land, view, wildlife, rolls));
+  const reports = look(cams, land, view, wildlife, rolls);
+  record(sightings, reports);
   cover(coverage, cams, land, view);
   const ahead = land.trail.points.slice(land.trail.points.indexOf(land.along(walked)));
-  return { view, wildlife, bears: bearsAhead(sightings, ahead) };
+  return { view, wildlife, reports, bears: bearsAhead(sightings, ahead) };
 }

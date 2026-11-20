@@ -223,8 +223,9 @@ export function createWorld(seed) {
   };
 
   // Wildlife along the hike: herds of elk in the open 50-250 m from the trail, deer at the forest's
-  // edges 30-200 m from it, a bear 40-120 m from it past its first 40%, and sun-warmed rocks 30-200 m
-  // from it; each on a spot its wander keeps clear of water and the mountains.
+  // edges 30-200 m from it, a bear 40-120 m from it past its first 40%, sun-warmed rocks 30-200 m
+  // from it, and a herd near the trailhead; each on a spot its wander keeps clear of water and the
+  // mountains.
   // From their own random stream, so they leave the rest of the world as it was; a rule that finds
   // no spot in 400 tries places nothing.
   const scatter = random(seed, 4);
@@ -261,6 +262,18 @@ export function createWorld(seed) {
   for (let i = 0; i < 4; i++) {
     const spot = find("rock", (p, off) => forest(p) < 0.3 && off > 30 && off < 200);
     if (spot) add("rock", spot);
+  }
+  // And a herd grazing near the trailhead, so the cameras find something in their first sweeps: 3-5
+  // elk in the open, 120-220 m along the walk and 40-120 m to one side of the trail
+  for (let tries = 0; tries < 400; tries++) {
+    const k = Math.min(Math.round(start + (120 + 100 * scatter()) / TRAIL_STEP), points.length - 2);
+    const [a, b] = [points[k], points[k + 1]];
+    const side = (scatter() < 0.5 ? -1 : 1) * (40 + 80 * scatter()) / distance(a, b);
+    const center = [a[0] - side * (b[1] - a[1]), a[1] + side * (b[0] - a[0])];
+    if (!fits(center, "elk") || forest(center) >= 0.3 || nearest(center)[0] < 40) continue;
+    const count = 3 + Math.floor(3 * scatter());
+    for (let i = 0; i < count; i++) add("elk", [center[0] + 15 * (2 * scatter() - 1), center[1] + 15 * (2 * scatter() - 1)], -4);
+    break;
   }
   // A smooth wander, -1..1, along time: a herd shares one, and each animal adds a little of its own
   const wave = (x) => noise(seed * 16 + 7, x, 0);
